@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều Kiện - MathLab</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+    <nav class="glass-nav">
+        <div class="logo">12B2<span>Math</span></div>
+        <ul>
+            <li><a href="index.html">Trang Chủ</a></li>
+            <li><a href="probability.html">Thường</a></li>
+            <li><a href="frequency.html">Tần Số</a></li>
+            <li><a href="conditional.html" class="active">Điều Kiện</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="glass-card">
+            <div class="author-tag">BY MINH NHỰT</div>
+            <h2 class="title-neon">SƠ ĐỒ CÂY XÁC SUẤT</h2>
+            <div class="tree-wrapper">
+                <div class="tree-node" style="background:var(--neon-blue); color:black; font-weight:bold; width: 120px;">\(\Omega\)</div>
+                <div class="tree-row">
+                    <div class="tree-column">
+                        <div style="color:var(--neon-blue); font-weight:bold;">Nhập \(P(A)\)</div>
+                        <input type="number" id="cA" placeholder="0.00">
+                        <div class="tree-node">
+                            <small>Biến cố \(A\)</small>
+                            <div style="display:flex; gap:10px; margin-top:15px;">
+                                <div style="flex:1">
+                                    <small>\(P(B|A)\)</small><br>
+                                    <input type="number" id="cB_A" style="width:80px">
+                                    <small class="neon-text" style="font-size:0.9rem" id="rAB">0</small>
+                                </div>
+                                <div style="flex:1">
+                                    <small>\(P(B'|A)\)</small><br>
+                                    <input type="number" id="cNotB_A" style="width:80px">
+                                    <small class="neon-text" style="font-size:0.9rem" id="rAnBnot">0</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tree-column">
+                        <div style="color:#94a3b8; font-weight:bold;">Nhập \(P(A')\)</div>
+                        <input type="number" id="cNotA" placeholder="0.00">
+                        <div class="tree-node">
+                            <small>Biến cố \(A'\)</small>
+                            <div style="display:flex; gap:10px; margin-top:15px;">
+                                <div style="flex:1">
+                                    <small>\(P(B|A')\)</small><br>
+                                    <input type="number" id="cB_notA" style="width:80px">
+                                    <small class="neon-text" style="font-size:0.9rem" id="rnotAB">0</small>
+                                </div>
+                                <div style="flex:1">
+                                    <small>\(P(B'|A')\)</small><br>
+                                    <input type="number" id="cNotB_notA" style="width:80px">
+                                    <small class="neon-text" style="font-size:0.9rem" id="rnotAnBnot">0</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-card" style="border-color:var(--emerald); margin-top:20px;">
+                <div style="display:flex; flex-wrap:wrap; justify-content:space-around; gap:20px;">
+                    <div>\(P(B)\) Toàn phần:<br><span id="pBT" class="emerald-text">0.0000</span></div>
+                    <div>\(P(A|B)\) Bayes:<br><span id="pBayes" class="emerald-text">0.0000</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
