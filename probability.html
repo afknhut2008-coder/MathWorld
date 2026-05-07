@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lý Thuyết - MathLab</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+    <nav class="glass-nav">
+        <div class="logo">12B2<span>Math</span></div>
+        <ul>
+            <li><a href="index.html">Trang Chủ</a></li>
+            <li><a href="probability.html" class="active">Thường</a></li>
+            <li><a href="frequency.html">Tần Số</a></li>
+            <li><a href="conditional.html">Điều Kiện</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="glass-card">
+            <div class="author-tag">BY MINH NHỰT</div>
+            <h2 class="title-neon">TÍNH THEO CHỈ SỐ \(P\)</h2>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+                <div class="glass-card">
+                    <div class="input-group"><label>\(P(A)\):</label><input type="number" id="pA" step="0.01"></div>
+                    <div class="input-group"><label>\(P(B)\):</label><input type="number" id="pB" step="0.01"></div>
+                    <div class="input-group"><label>\(P(A \cap B)\):</label><input type="number" id="pAnB" step="0.01"></div>
+                </div>
+                <div class="glass-card" style="text-align:left;">
+                    <label style="display:block; margin:10px 0;"><input type="radio" name="mode" value="none" checked> Tùy biến</label>
+                    <label style="display:block; margin:10px 0;"><input type="radio" name="mode" value="xungkhac"> Xung khắc (\(P \cap = 0\))</label>
+                    <label style="display:block; margin:10px 0;"><input type="radio" name="mode" value="doclap"> Độc lập (\(P \cap = P.P\))</label>
+                </div>
+            </div>
+            <div class="tree-row" style="margin-top:20px">
+                <div class="tree-node">\(P(A')\)<span id="resNotA" class="neon-text">0.00</span></div>
+                <div class="tree-node">\(P(B')\)<span id="resNotB" class="neon-text">0.00</span></div>
+                <div class="tree-node" style="border-color:var(--emerald); flex: 1 1 100%;">\(P(A \cup B)\)<span id="resAorB" class="emerald-text">0.0000</span></div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tần Số - MathLab</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+    <nav class="glass-nav">
+        <div class="logo">12B2<span>Math</span></div>
+        <ul>
+            <li><a href="index.html">Trang Chủ</a></li>
+            <li><a href="probability.html">Thường</a></li>
+            <li><a href="frequency.html" class="active">Tần Số</a></li>
+            <li><a href="conditional.html">Điều Kiện</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <div class="glass-card">
+            <div class="author-tag">BY MINH NHỰT</div>
+            <h2 class="title-neon">TÍNH THEO SỐ PHẦN TỬ \(n\)</h2>
+            <div style="max-width:500px; margin: 0 auto;">
+                <div class="input-group"><label>\(n(\Omega)\):</label><input type="number" id="nOmega"></div>
+                <div class="input-group"><label>\(n(A)\):</label><input type="number" id="nA"></div>
+                <div class="input-group"><label>\(n(B)\):</label><input type="number" id="nB"></div>
+                <div class="input-group"><label>\(n(A \cap B)\):</label><input type="number" id="nAnB_f"></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:25px;">
+                <div class="glass-card"><small>\(P(A)\)</small><span id="pA_f" class="neon-text">0</span></div>
+                <div class="glass-card"><small>\(P(B)\)</small><span id="pB_f" class="neon-text">0</span></div>
+            </div>
+            <div class="glass-card" style="border-color:var(--emerald);">
+                <small>\(P(A \cup B)\) KẾT QUẢ</small>
+                <span id="pU" class="emerald-text">0.0000</span>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
