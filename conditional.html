@@ -6,6 +6,78 @@
     <title>Điều Kiện - MathLab 12B2</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <style>
+    /* ===== NI SECTION ON PROB/COND PAGES ===== */
+    .ni-section-prob {
+        margin-bottom: 24px;
+        padding: 18px 20px 14px;
+        background: rgba(0,0,0,.15);
+        border: 1px solid rgba(255,229,0,.12);
+        border-radius: 18px;
+        animation: niSlideIn .5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes niSlideIn {
+        from { opacity:0; transform:translateY(-10px) scale(.98); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    .ni-section-prob .ni-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .ni-section-prob .ni-title  { font-family:var(--font-orb); font-size:.74rem; letter-spacing:2px; white-space:nowrap; }
+    .ni-section-prob .ni-line   { flex:1; height:1px; }
+    .ni-section-prob .ni-hint   { font-size:.63rem; color:#475569; font-family:var(--font-viet); white-space:nowrap; }
+    .ni-section-prob .ni-grid   { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+    @media(max-width:520px){ .ni-section-prob .ni-grid { grid-template-columns:1fr; } }
+    .ni-section-prob .ni-field-label { font-size:.66rem; color:var(--text-mid); margin-bottom:5px; padding-left:4px; font-family:var(--font-viet); }
+    .ni-section-prob .ni-field-label em { font-style:italic; color:#475569; }
+    .ni-section-prob .ni-field-row {
+        display:flex; align-items:stretch;
+        background:rgba(0,0,0,.3); border:1px solid var(--nif-b,rgba(0,242,255,.2));
+        border-radius:13px; overflow:hidden; transition:all .3s ease;
+    }
+    .ni-section-prob .ni-field-row:focus-within {
+        border-color:var(--nif-c,var(--neon-blue));
+        box-shadow:0 0 18px var(--nif-gl,rgba(0,242,255,.13));
+        background:rgba(0,0,0,.42);
+    }
+    .ni-section-prob .a-f  { --nif-c:var(--neon-blue); --nif-b:rgba(0,242,255,.22);    --nif-gl:rgba(0,242,255,.11); }
+    .ni-section-prob .na-f { --nif-c:#64748b;          --nif-b:rgba(100,116,139,.28);  --nif-gl:rgba(100,116,139,.09); }
+    .ni-section-prob .b-f  { --nif-c:var(--emerald);   --nif-b:rgba(16,185,129,.22);   --nif-gl:rgba(16,185,129,.11); }
+    .ni-section-prob .nb-f { --nif-c:#4ade80;          --nif-b:rgba(74,222,128,.18);   --nif-gl:rgba(74,222,128,.09); }
+    .ni-section-prob .ni-prefix {
+        padding:10px 13px; font-family:var(--font-orb); font-size:.8rem; font-weight:700;
+        white-space:nowrap; border-right:1px solid rgba(255,255,255,.07);
+        background:rgba(0,0,0,.18); color:var(--nif-c,var(--neon-blue));
+        min-width:48px; text-align:center; transition:background .3s;
+    }
+    .ni-section-prob .ni-field-row:focus-within .ni-prefix { background:rgba(0,0,0,.35); }
+    .ni-section-prob .ni-field-row input[type="text"] {
+        background:transparent!important; border:none!important; border-radius:0!important;
+        flex:1; padding:10px 13px; font-size:.83rem; color:white; outline:none; width:100%;
+        font-family:var(--font-viet);
+    }
+    .ni-section-prob .ni-field-row input[type="text"]::placeholder { color:rgba(148,163,184,.4); font-style:italic; }
+    .ni-section-prob .ni-inline-label {
+        display:flex; align-items:center; gap:6px;
+        margin-top:7px; padding:5px 10px;
+        background:rgba(0,0,0,.18); border-radius:8px;
+        border:1px solid rgba(255,255,255,.05);
+        font-family:var(--font-mono); font-size:.72rem; transition:all .25s;
+    }
+    .ni-section-prob .nil-math { font-weight:700; font-size:.74rem; white-space:nowrap; }
+    .ni-section-prob .nil-eq   { color:#334155; font-size:.8rem; }
+    .ni-section-prob .nil-name { font-family:var(--font-viet); font-size:.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-style:italic; opacity:.85; transition:all .2s; }
+    .ni-section-prob .c-blue  { color:var(--neon-blue); }
+    .ni-section-prob .c-gray  { color:#64748b; }
+    .ni-section-prob .c-green { color:var(--emerald); }
+    .ni-section-prob .c-lime  { color:#4ade80; }
+    .ni-section-prob .ni-preview {
+        padding:10px 14px; background:rgba(0,0,0,.15); border-radius:10px;
+        border:1px solid rgba(255,255,255,.05); font-family:var(--font-mono);
+        font-size:.72rem; line-height:1.8; text-align:center; transition: all .3s;
+    }
+    .pv-blue  { color:var(--neon-blue); }
+    .pv-green { color:var(--emerald); }
+    .pv-dim   { color:#475569; }
+    </style>
 </head>
 <body>
     <nav class="glass-nav">
@@ -22,57 +94,92 @@
             <div class="author-tag">BY MINH NHỰT</div>
             <h2 class="title-neon">SƠ ĐỒ CÂY & XÁC SUẤT NGHỊCH ĐẢO</h2>
 
-            <!-- ĐẶT TÊN BIẾN CỐ -->
-            <div style="margin-bottom:24px;">
-                <span class="sec-label yellow">✏️ Đặt Tên Biến Cố (tùy chọn)</span>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:600px; margin:10px auto 0;">
-                    <div class="calc-field">
-                        <label style="color:var(--neon-blue);">Tên biến cố A</label>
-                        <input type="text" id="name-A" placeholder="vd: học sinh nam" maxlength="30"
-                               style="text-align:left; font-size:0.82rem; color:var(--neon-blue);">
+            <!-- ĐẶT TÊN BIẾN CỐ — NÂNG CẤP -->
+            <div class="ni-section-prob">
+                <div class="ni-header">
+                    <div class="ni-title" style="color:var(--neon-yellow);">✏️ Đặt Tên Biến Cố</div>
+                    <div class="ni-line" style="background:linear-gradient(90deg,rgba(255,229,0,.35),transparent);"></div>
+                    <div class="ni-hint">Tùy chọn · ảnh hưởng nhãn toàn bộ sơ đồ cây</div>
+                </div>
+                <div class="ni-grid">
+                    <div class="ni-field a-f">
+                        <div class="ni-field-label">Biến cố chính</div>
+                        <div class="ni-field-row">
+                            <div class="ni-prefix">A</div>
+                            <input type="text" id="name-A" placeholder="vd: học sinh nam" maxlength="30">
+                        </div>
+                        <div class="ni-inline-label">
+                            <span class="nil-math c-blue">P(A)</span>
+                            <span class="nil-eq">=</span>
+                            <span class="nil-name c-blue" id="cond-nil-A">xác suất A xảy ra</span>
+                        </div>
                     </div>
-                    <div class="calc-field">
-                        <label style="color:#94a3b8;">Tên biến cố A' (bù)</label>
-                        <input type="text" id="name-notA" placeholder="tự tạo nếu để trống" maxlength="30"
-                               style="text-align:left; font-size:0.82rem; color:#94a3b8;">
+                    <div class="ni-field na-f">
+                        <div class="ni-field-label">Bù của A &nbsp;<em>· tự tạo nếu để trống</em></div>
+                        <div class="ni-field-row">
+                            <div class="ni-prefix">A'</div>
+                            <input type="text" id="name-notA" placeholder="tự tạo..." maxlength="30">
+                        </div>
+                        <div class="ni-inline-label">
+                            <span class="nil-math c-gray">P(A')</span>
+                            <span class="nil-eq">=</span>
+                            <span class="nil-name c-gray" id="cond-nil-NA">xác suất A không xảy ra</span>
+                        </div>
                     </div>
-                    <div class="calc-field">
-                        <label style="color:var(--emerald);">Tên biến cố B</label>
-                        <input type="text" id="name-B" placeholder="vd: học sinh giỏi" maxlength="30"
-                               style="text-align:left; font-size:0.82rem; color:var(--emerald);">
+                    <div class="ni-field b-f">
+                        <div class="ni-field-label">Biến cố phụ</div>
+                        <div class="ni-field-row">
+                            <div class="ni-prefix">B</div>
+                            <input type="text" id="name-B" placeholder="vd: học sinh giỏi" maxlength="30">
+                        </div>
+                        <div class="ni-inline-label">
+                            <span class="nil-math c-green">P(B)</span>
+                            <span class="nil-eq">=</span>
+                            <span class="nil-name c-green" id="cond-nil-B">xác suất B xảy ra</span>
+                        </div>
                     </div>
-                    <div class="calc-field">
-                        <label style="color:#6ee7b7;">Tên biến cố B' (bù)</label>
-                        <input type="text" id="name-notB" placeholder="tự tạo nếu để trống" maxlength="30"
-                               style="text-align:left; font-size:0.82rem; color:#6ee7b7;">
+                    <div class="ni-field nb-f">
+                        <div class="ni-field-label">Bù của B &nbsp;<em>· tự tạo nếu để trống</em></div>
+                        <div class="ni-field-row">
+                            <div class="ni-prefix">B'</div>
+                            <input type="text" id="name-notB" placeholder="tự tạo..." maxlength="30">
+                        </div>
+                        <div class="ni-inline-label">
+                            <span class="nil-math c-lime">P(B')</span>
+                            <span class="nil-eq">=</span>
+                            <span class="nil-name c-lime" id="cond-nil-NB">xác suất B không xảy ra</span>
+                        </div>
                     </div>
+                </div>
+                <div class="ni-preview" id="cond-ni-preview" style="margin-top:12px;">
+                    <span class="pv-dim">Nhập tên biến cố để xem trước nhãn sơ đồ cây...</span>
                 </div>
             </div>
 
             <!-- SƠ ĐỒ CÂY -->
             <div class="tree-wrapper">
-                <div class="tree-node" style="background:var(--neon-blue); color:black; font-weight:bold; width:120px;">Ω</div>
+                <div class="tree-node" style="background:var(--neon-blue); color:black; font-weight:bold; width:clamp(80px,25vw,120px); text-align:center;">Ω</div>
                 <div class="tree-row">
                     <!-- NHÁNH A -->
                     <div class="tree-column">
-                        <div id="lbl-cA" style="color:var(--neon-blue); font-weight:bold;">Nhập P(A)</div>
-                        <input type="number" id="cA" placeholder="0.00" step="0.0001" onfocus="this.select()">
+                        <div id="lbl-cA" style="color:var(--neon-blue); font-weight:bold; font-size:clamp(0.75rem,3vw,0.9rem);">Nhập P(A)</div>
+                        <input type="number" id="cA" placeholder="0.00" step="0.0001" onfocus="this.select()" style="max-width:140px;">
                         <div class="tree-node">
-                            <small id="lbl-node-A">Biến cố "A"</small>
-                            <div style="display:flex; gap:10px; margin-top:15px;">
-                                <div style="flex:1; text-align:center;">
+                            <small id="lbl-node-A" style="font-size:clamp(0.7rem,2.5vw,0.82rem);">Biến cố "A"</small>
+                            <div class="tree-branch-row">
+                                <div class="tree-branch-cell">
                                     <small id="lbl-cB_A">P(B|A)</small><br>
-                                    <input type="number" id="cB_A" style="width:90px" step="0.0001" onfocus="this.select()">
+                                    <input type="number" id="cB_A" class="tree-branch-input" step="0.0001" onfocus="this.select()">
                                     <div style="margin-top:6px;">
-                                        <small id="lbl-rAB" style="font-size:0.65rem; color:#64748b;">P(A∩B)</small><br>
+                                        <small id="lbl-rAB" class="tree-result-lbl">P(A∩B)</small><br>
                                         <small class="neon-text" id="rAB">0</small>
                                     </div>
                                 </div>
-                                <div style="flex:1; text-align:center;">
+                                <div class="tree-branch-cell">
                                     <small id="lbl-cNotB_A">P(B'|A)</small><br>
-                                    <input type="number" id="cNotB_A" style="width:90px" step="0.0001" onfocus="this.select()">
+                                    <input type="number" id="cNotB_A" class="tree-branch-input" step="0.0001" onfocus="this.select()">
                                     <div style="margin-top:6px;">
-                                        <small id="lbl-rAnBnot" style="font-size:0.65rem; color:#64748b;">P(A∩B')</small><br>
+                                        <small id="lbl-rAnBnot" class="tree-result-lbl">P(A∩B')</small><br>
                                         <small class="neon-text" id="rAnBnot">0</small>
                                     </div>
                                 </div>
@@ -81,24 +188,24 @@
                     </div>
                     <!-- NHÁNH A' -->
                     <div class="tree-column">
-                        <div id="lbl-cNotA" style="color:#94a3b8; font-weight:bold;">Nhập P(A')</div>
-                        <input type="number" id="cNotA" placeholder="0.00" step="0.0001" onfocus="this.select()">
+                        <div id="lbl-cNotA" style="color:#94a3b8; font-weight:bold; font-size:clamp(0.75rem,3vw,0.9rem);">Nhập P(A')</div>
+                        <input type="number" id="cNotA" placeholder="0.00" step="0.0001" onfocus="this.select()" style="max-width:140px;">
                         <div class="tree-node">
-                            <small id="lbl-node-nA">Biến cố "A'"</small>
-                            <div style="display:flex; gap:10px; margin-top:15px;">
-                                <div style="flex:1; text-align:center;">
+                            <small id="lbl-node-nA" style="font-size:clamp(0.7rem,2.5vw,0.82rem);">Biến cố "A'"</small>
+                            <div class="tree-branch-row">
+                                <div class="tree-branch-cell">
                                     <small id="lbl-cB_notA">P(B|A')</small><br>
-                                    <input type="number" id="cB_notA" style="width:90px" step="0.0001" onfocus="this.select()">
+                                    <input type="number" id="cB_notA" class="tree-branch-input" step="0.0001" onfocus="this.select()">
                                     <div style="margin-top:6px;">
-                                        <small id="lbl-rnotAB" style="font-size:0.65rem; color:#64748b;">P(A'∩B)</small><br>
+                                        <small id="lbl-rnotAB" class="tree-result-lbl">P(A'∩B)</small><br>
                                         <small class="neon-text" id="rnotAB">0</small>
                                     </div>
                                 </div>
-                                <div style="flex:1; text-align:center;">
+                                <div class="tree-branch-cell">
                                     <small id="lbl-cNotB_notA">P(B'|A')</small><br>
-                                    <input type="number" id="cNotB_notA" style="width:90px" step="0.0001" onfocus="this.select()">
+                                    <input type="number" id="cNotB_notA" class="tree-branch-input" step="0.0001" onfocus="this.select()">
                                     <div style="margin-top:6px;">
-                                        <small id="lbl-rnotAnBnot" style="font-size:0.65rem; color:#64748b;">P(A'∩B')</small><br>
+                                        <small id="lbl-rnotAnBnot" class="tree-result-lbl">P(A'∩B')</small><br>
                                         <small class="neon-text" id="rnotAnBnot">0</small>
                                     </div>
                                 </div>
@@ -338,6 +445,51 @@ const COND_TOOLTIPS = {
     'cNotB_notA':  { label:"P(B'|A') — Xác suất có điều kiện", desc:"Xác suất B KHÔNG xảy ra khi A cũng không xảy ra. Nhánh dưới của A'.", formula:"P(B'|A') = 1 − P(B|A')" },
 };
 initTooltips(COND_TOOLTIPS);
+</script>
+<script>
+// ===== NAME INPUT LIVE PREVIEW (conditional.html) =====
+function updateCondNilLabels() {
+    const nA  = document.getElementById('name-A').value.trim()    || '';
+    const nB  = document.getElementById('name-B').value.trim()    || '';
+    const nNA = document.getElementById('name-notA').value.trim() || '';
+    const nNB = document.getElementById('name-notB').value.trim() || '';
+
+    const dA  = nA  || 'A';
+    const dB  = nB  || 'B';
+    const dNA = nNA || (nA ? 'không ' + nA : "A'");
+    const dNB = nNB || (nB ? 'không ' + nB : "B'");
+
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    set('cond-nil-A',  nA  ? '"' + nA  + '"' : 'xác suất A xảy ra');
+    set('cond-nil-NA', nNA ? '"' + nNA + '"' : (nA ? '"không ' + nA + '"' : 'xác suất A không xảy ra'));
+    set('cond-nil-B',  nB  ? '"' + nB  + '"' : 'xác suất B xảy ra');
+    set('cond-nil-NB', nNB ? '"' + nNB + '"' : (nB ? '"không ' + nB + '"' : 'xác suất B không xảy ra'));
+
+    const prev = document.getElementById('cond-ni-preview');
+    if (!prev) return;
+    if (!nA && !nB) {
+        prev.innerHTML = '<span class="pv-dim">Nhập tên biến cố để xem trước nhãn sơ đồ cây...</span>';
+        return;
+    }
+    prev.innerHTML =
+        `<span class="pv-blue">P(${dA})</span> <span class="pv-dim">·</span> <span style="color:#475569">P(${dNA})</span>`
+        + `&emsp;<span class="pv-dim">|</span>&emsp;`
+        + `<span class="pv-green">P(${dB})</span> <span class="pv-dim">·</span> <span style="color:#4ade80;opacity:.75">P(${dNB})</span>`
+        + `<br><span class="pv-dim">P(${dB}|${dA}) &nbsp;·&nbsp; P(${dB}|${dNA}) &nbsp;·&nbsp; P(${dA}|${dB}) &nbsp;·&nbsp; P(${dA}|${dNB})</span>`;
+}
+['name-A','name-B','name-notA','name-notB'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const saved = sessionStorage.getItem('ml_' + id);
+    if (saved) el.value = saved;
+    el.addEventListener('input', () => {
+        sessionStorage.setItem('ml_' + id, el.value);
+        updateCondNilLabels();
+        updateTreeLabels(); // keep tree labels in sync
+    });
+});
+updateCondNilLabels();
+updateTreeLabels();
 </script>
 </body>
 </html>

@@ -21,19 +21,38 @@
         <div class="glass-card">
             <div class="author-tag">BY MINH NHỰT</div>
             <h2 class="title-neon">TÍNH THEO SỐ PHẦN TỬ \(n\)</h2>
-            <div style="max-width:500px; margin: 0 auto;">
-                <div class="input-group"><label>\(n(\Omega)\):</label><input type="number" id="nOmega"></div>
-                <div class="input-group"><label>\(n(A)\):</label><input type="number" id="nA"></div>
-                <div class="input-group"><label>\(n(B)\):</label><input type="number" id="nB"></div>
-                <div class="input-group"><label>\(n(A \cap B)\):</label><input type="number" id="nAnB_f"></div>
+            <p class="title-sub">Nhập số phần tử — xác suất tự động tính</p>
+            <div class="freq-input-grid">
+                <div class="calc-field">
+                    <label>\(n(\Omega)\) — Không gian mẫu</label>
+                    <input type="number" id="nOmega" placeholder="0" min="1">
+                </div>
+                <div class="calc-field">
+                    <label>\(n(A)\) — Số phần tử A</label>
+                    <input type="number" id="nA" placeholder="0" min="0">
+                </div>
+                <div class="calc-field">
+                    <label>\(n(B)\) — Số phần tử B</label>
+                    <input type="number" id="nB" placeholder="0" min="0">
+                </div>
+                <div class="calc-field">
+                    <label>\(n(A \cap B)\) — Giao</label>
+                    <input type="number" id="nAnB_f" placeholder="0" min="0">
+                </div>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:25px;">
-                <div class="glass-card"><small>\(P(A)\)</small><span id="pA_f" class="neon-text">0</span></div>
-                <div class="glass-card"><small>\(P(B)\)</small><span id="pB_f" class="neon-text">0</span></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px;">
+                <div class="result-box c-blue active">
+                    <small>\(P(A) = n(A) / n(\Omega)\)</small>
+                    <span id="pA_f" class="val c-blue">0</span>
+                </div>
+                <div class="result-box c-green">
+                    <small>\(P(B) = n(B) / n(\Omega)\)</small>
+                    <span id="pB_f" class="val c-green">0</span>
+                </div>
             </div>
-            <div class="glass-card" style="border-color:var(--emerald);">
-                <small>\(P(A \cup B)\) KẾT QUẢ</small>
-                <span id="pU" class="emerald-text">0.0000</span>
+            <div class="result-box c-green active" style="margin-top:12px; border-color:var(--emerald);">
+                <small>\(P(A \cup B) = P(A) + P(B) - P(A \cap B)\) — KẾT QUẢ</small>
+                <span id="pU" class="val c-green">0.0000</span>
             </div>
         </div>
     </div>

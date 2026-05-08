@@ -6,6 +6,84 @@
     <title>Xác Suất Thường - MathLab 12B2</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <style>
+    /* ===== NI SECTION ON PROB/COND PAGES ===== */
+    .ni-section-prob {
+        margin-bottom: 24px;
+        padding: 18px 20px 14px;
+        background: rgba(0,0,0,.15);
+        border: 1px solid rgba(255,229,0,.12);
+        border-radius: 18px;
+        animation: niSlideIn .5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes niSlideIn {
+        from { opacity:0; transform:translateY(-10px) scale(.98); }
+        to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    .ni-section-prob .ni-header { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .ni-section-prob .ni-title  { font-family:var(--font-orb); font-size:.74rem; letter-spacing:2px; color:var(--neon-yellow); white-space:nowrap; }
+    .ni-section-prob .ni-line   { flex:1; height:1px; }
+    .ni-section-prob .ni-hint   { font-size:.63rem; color:#475569; font-family:var(--font-viet); white-space:nowrap; }
+    .ni-section-prob .ni-grid   { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+    @media(max-width:520px){ .ni-section-prob .ni-grid { grid-template-columns:1fr; } }
+
+    .ni-section-prob .ni-field-label { font-size:.66rem; color:var(--text-mid); margin-bottom:5px; padding-left:4px; font-family:var(--font-viet); }
+    .ni-section-prob .ni-field-label em { font-style:italic; color:#475569; }
+    .ni-section-prob .ni-field-row {
+        display:flex; align-items:stretch;
+        background:rgba(0,0,0,.3); border:1px solid var(--nif-b,rgba(0,242,255,.2));
+        border-radius:13px; overflow:hidden; transition:all .3s ease;
+    }
+    .ni-section-prob .ni-field-row:focus-within {
+        border-color:var(--nif-c,var(--neon-blue));
+        box-shadow:0 0 18px var(--nif-gl,rgba(0,242,255,.13));
+        background:rgba(0,0,0,.42);
+    }
+    .ni-section-prob .a-f  { --nif-c:var(--neon-blue); --nif-b:rgba(0,242,255,.22);    --nif-gl:rgba(0,242,255,.11); }
+    .ni-section-prob .na-f { --nif-c:#64748b;          --nif-b:rgba(100,116,139,.28);  --nif-gl:rgba(100,116,139,.09); }
+    .ni-section-prob .b-f  { --nif-c:var(--emerald);   --nif-b:rgba(16,185,129,.22);   --nif-gl:rgba(16,185,129,.11); }
+    .ni-section-prob .nb-f { --nif-c:#4ade80;          --nif-b:rgba(74,222,128,.18);   --nif-gl:rgba(74,222,128,.09); }
+
+    .ni-section-prob .ni-prefix {
+        padding:10px 13px; font-family:var(--font-orb); font-size:.8rem; font-weight:700;
+        white-space:nowrap; border-right:1px solid rgba(255,255,255,.07);
+        background:rgba(0,0,0,.18); color:var(--nif-c,var(--neon-blue));
+        min-width:48px; text-align:center; transition:background .3s;
+    }
+    .ni-section-prob .ni-field-row:focus-within .ni-prefix { background:rgba(0,0,0,.35); }
+    .ni-section-prob .ni-field-row input[type="text"] {
+        background:transparent!important; border:none!important; border-radius:0!important;
+        flex:1; padding:10px 13px; font-size:.83rem; color:white; outline:none; width:100%;
+        font-family:var(--font-viet);
+    }
+    .ni-section-prob .ni-field-row input[type="text"]::placeholder { color:rgba(148,163,184,.4); font-style:italic; }
+
+    .ni-section-prob .ni-inline-label {
+        display:flex; align-items:center; gap:6px;
+        margin-top:7px; padding:5px 10px;
+        background:rgba(0,0,0,.18); border-radius:8px;
+        border:1px solid rgba(255,255,255,.05);
+        font-family:var(--font-mono); font-size:.72rem;
+        transition:all .25s;
+    }
+    .ni-section-prob .nil-math { font-weight:700; font-size:.74rem; white-space:nowrap; }
+    .ni-section-prob .nil-eq   { color:#334155; font-size:.8rem; }
+    .ni-section-prob .nil-name { font-family:var(--font-viet); font-size:.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-style:italic; opacity:.85; transition:all .2s; }
+    .ni-section-prob .c-blue  { color:var(--neon-blue); }
+    .ni-section-prob .c-gray  { color:#64748b; }
+    .ni-section-prob .c-green { color:var(--emerald); }
+    .ni-section-prob .c-lime  { color:#4ade80; }
+
+    .ni-section-prob .ni-preview {
+        padding:10px 14px; background:rgba(0,0,0,.15); border-radius:10px;
+        border:1px solid rgba(255,255,255,.05); font-family:var(--font-mono);
+        font-size:.72rem; line-height:1.8; text-align:center;
+        transition: all .3s;
+    }
+    .pv-blue  { color:var(--neon-blue); }
+    .pv-green { color:var(--emerald); }
+    .pv-dim   { color:#475569; }
+    </style>
 </head>
 <body>
 <nav class="glass-nav">
@@ -23,30 +101,65 @@
     <h2 class="title-neon">XÁC SUẤT LÝ THUYẾT</h2>
     <p class="title-sub">Nhập bất kỳ giá trị nào — hệ thống tự động suy ra các giá trị còn lại</p>
 
-    <!-- ĐẶT TÊN BIẾN CỐ -->
-    <div style="margin-bottom:24px;">
-        <span class="sec-label yellow">✏️ Đặt Tên Biến Cố (tùy chọn)</span>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:600px; margin:10px auto 0;">
-            <div class="calc-field">
-                <label style="color:var(--neon-blue);">Tên biến cố A</label>
-                <input type="text" id="name-A" placeholder="vd: học sinh nam" maxlength="30"
-                       style="text-align:left; font-size:0.82rem; color:var(--neon-blue);">
+    <!-- ĐẶT TÊN BIẾN CỐ — NÂNG CẤP -->
+    <div class="ni-section-prob">
+        <div class="ni-header">
+            <div class="ni-title" style="color:var(--neon-yellow);">✏️ Đặt Tên Biến Cố</div>
+            <div class="ni-line" style="background:linear-gradient(90deg,rgba(255,229,0,.35),transparent);"></div>
+            <div class="ni-hint">Tùy chọn · dùng chung cho kết quả bên dưới</div>
+        </div>
+        <div class="ni-grid">
+            <div class="ni-field a-f">
+                <div class="ni-field-label">Biến cố chính</div>
+                <div class="ni-field-row">
+                    <div class="ni-prefix">A</div>
+                    <input type="text" id="name-A" placeholder="vd: học sinh nam" maxlength="30">
+                </div>
+                <div class="ni-inline-label">
+                    <span class="nil-math c-blue">P(A)</span>
+                    <span class="nil-eq">=</span>
+                    <span class="nil-name c-blue" id="prob-nil-A">xác suất A xảy ra</span>
+                </div>
             </div>
-            <div class="calc-field">
-                <label style="color:#94a3b8;">Tên biến cố A' (bù)</label>
-                <input type="text" id="name-notA" placeholder="tự tạo nếu để trống" maxlength="30"
-                       style="text-align:left; font-size:0.82rem; color:#94a3b8;">
+            <div class="ni-field na-f">
+                <div class="ni-field-label">Bù của A &nbsp;<em>· tự tạo nếu để trống</em></div>
+                <div class="ni-field-row">
+                    <div class="ni-prefix">A'</div>
+                    <input type="text" id="name-notA" placeholder="tự tạo..." maxlength="30">
+                </div>
+                <div class="ni-inline-label">
+                    <span class="nil-math c-gray">P(A')</span>
+                    <span class="nil-eq">=</span>
+                    <span class="nil-name c-gray" id="prob-nil-NA">xác suất A không xảy ra</span>
+                </div>
             </div>
-            <div class="calc-field">
-                <label style="color:var(--emerald);">Tên biến cố B</label>
-                <input type="text" id="name-B" placeholder="vd: học sinh giỏi" maxlength="30"
-                       style="text-align:left; font-size:0.82rem; color:var(--emerald);">
+            <div class="ni-field b-f">
+                <div class="ni-field-label">Biến cố phụ</div>
+                <div class="ni-field-row">
+                    <div class="ni-prefix">B</div>
+                    <input type="text" id="name-B" placeholder="vd: học sinh giỏi" maxlength="30">
+                </div>
+                <div class="ni-inline-label">
+                    <span class="nil-math c-green">P(B)</span>
+                    <span class="nil-eq">=</span>
+                    <span class="nil-name c-green" id="prob-nil-B">xác suất B xảy ra</span>
+                </div>
             </div>
-            <div class="calc-field">
-                <label style="color:#6ee7b7;">Tên biến cố B' (bù)</label>
-                <input type="text" id="name-notB" placeholder="tự tạo nếu để trống" maxlength="30"
-                       style="text-align:left; font-size:0.82rem; color:#6ee7b7;">
+            <div class="ni-field nb-f">
+                <div class="ni-field-label">Bù của B &nbsp;<em>· tự tạo nếu để trống</em></div>
+                <div class="ni-field-row">
+                    <div class="ni-prefix">B'</div>
+                    <input type="text" id="name-notB" placeholder="tự tạo..." maxlength="30">
+                </div>
+                <div class="ni-inline-label">
+                    <span class="nil-math c-lime">P(B')</span>
+                    <span class="nil-eq">=</span>
+                    <span class="nil-name c-lime" id="prob-nil-NB">xác suất B không xảy ra</span>
+                </div>
             </div>
+        </div>
+        <div class="ni-preview" id="prob-ni-preview" style="margin-top:12px;">
+            <span class="pv-dim">Nhập tên biến cố để xem trước nhãn...</span>
         </div>
     </div>
 
@@ -322,6 +435,52 @@ const PROB_TOOLTIPS = {
     'pAuB':   { label:'P(A∪B) — Hợp', desc:'Xác suất ít nhất một trong hai biến cố A hoặc B xảy ra.', formula:'P(A∪B) = P(A) + P(B) − P(A∩B)' },
 };
 initTooltips(PROB_TOOLTIPS);
+</script>
+<script>
+// ===== NAME INPUT LIVE PREVIEW (probability.html) =====
+function updateProbNilLabels() {
+    const nA  = document.getElementById('name-A').value.trim()    || '';
+    const nB  = document.getElementById('name-B').value.trim()    || '';
+    const nNA = document.getElementById('name-notA').value.trim() || '';
+    const nNB = document.getElementById('name-notB').value.trim() || '';
+
+    const dA  = nA  || 'A';
+    const dB  = nB  || 'B';
+    const dNA = nNA || (nA ? 'không ' + nA : "A'");
+    const dNB = nNB || (nB ? 'không ' + nB : "B'");
+
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    set('prob-nil-A',  nA  ? '"' + nA  + '"' : 'xác suất A xảy ra');
+    set('prob-nil-NA', nNA ? '"' + nNA + '"' : (nA ? '"không ' + nA + '"' : 'xác suất A không xảy ra'));
+    set('prob-nil-B',  nB  ? '"' + nB  + '"' : 'xác suất B xảy ra');
+    set('prob-nil-NB', nNB ? '"' + nNB + '"' : (nB ? '"không ' + nB + '"' : 'xác suất B không xảy ra'));
+
+    const prev = document.getElementById('prob-ni-preview');
+    if (!prev) return;
+    if (!nA && !nB) {
+        prev.innerHTML = '<span class="pv-dim">Nhập tên biến cố để xem trước nhãn...</span>';
+        return;
+    }
+    prev.innerHTML =
+        `<span class="pv-blue">P(${dA})</span> <span class="pv-dim">·</span> <span style="color:#475569">P(${dNA})</span>`
+        + `&emsp;<span class="pv-dim">|</span>&emsp;`
+        + `<span class="pv-green">P(${dB})</span> <span class="pv-dim">·</span> <span style="color:#4ade80;opacity:.75">P(${dNB})</span>`
+        + `<br><span class="pv-dim">P(${dA} ∩ ${dB}) &nbsp;·&nbsp; P(${dA} ∪ ${dB}) &nbsp;·&nbsp; P(${dB}|${dA}) &nbsp;·&nbsp; P(${dA}|${dB})</span>`;
+}
+// Restore + attach
+['name-A','name-B','name-notA','name-notB'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const saved = sessionStorage.getItem('ml_' + id);
+    if (saved) el.value = saved;
+    el.addEventListener('input', () => {
+        sessionStorage.setItem('ml_' + id, el.value);
+        updateProbNilLabels();
+        updateProbLabels(); // keep result labels in sync
+    });
+});
+updateProbNilLabels();
+updateProbLabels();
 </script>
 </body>
 </html>
