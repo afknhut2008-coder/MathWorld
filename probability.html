@@ -318,6 +318,54 @@
         </div>
     </div>
 
+    <!-- SWITCHER: NHẬP TẦN SỐ vs XÁC SUẤT -->
+    <div style="margin-bottom:22px;">
+        <span class="sec-label blue">🔢 Chế Độ Nhập Liệu</span>
+        <div style="display:flex;gap:10px;margin:12px auto 0;max-width:500px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:5px;">
+            <button id="btn-mode-prob" onclick="switchInputMode('prob')"
+                style="flex:1;padding:9px 14px;border-radius:17px;border:none;font-family:var(--font-orb);font-size:.72rem;letter-spacing:1px;cursor:pointer;transition:all .28s;background:rgba(0,242,255,.18);color:var(--neon-blue);box-shadow:0 0 16px rgba(0,242,255,.18);">
+                📐 Nhập Xác Suất P(·)
+            </button>
+            <button id="btn-mode-freq" onclick="switchInputMode('freq')"
+                style="flex:1;padding:9px 14px;border-radius:17px;border:none;font-family:var(--font-orb);font-size:.72rem;letter-spacing:1px;cursor:pointer;transition:all .28s;background:transparent;color:#64748b;">
+                📊 Nhập Tần Số n(·)
+            </button>
+        </div>
+        <p id="input-mode-hint" style="text-align:center;font-size:.68rem;color:#475569;font-family:var(--font-viet);margin-top:8px;">
+            Nhập trực tiếp xác suất P(A), P(B), P(A∩B) từ 0 đến 1
+        </p>
+    </div>
+
+    <!-- PANEL NHẬP TẦN SỐ (ẩn mặc định) -->
+    <div id="panel-freq-input" style="display:none;margin-bottom:20px;padding:16px 18px 14px;background:rgba(0,0,0,.18);border:1px solid rgba(255,229,0,.18);border-radius:16px;animation:niSlideIn .4s ease both;">
+        <span class="sec-label" style="color:var(--neon-yellow);">📊 Nhập Số Phần Tử (Tần Số)</span>
+        <div class="calc-grid" style="max-width:700px;margin:12px auto 0;">
+            <div class="calc-field">
+                <label>n(Ω) — Không gian mẫu</label>
+                <input type="number" id="fn-nO" placeholder="Tổng số phần tử" min="1" step="1" onfocus="this.select()">
+            </div>
+            <div class="calc-field">
+                <label id="fn-lbl-nA">n(A) — Số phần tử A</label>
+                <input type="number" id="fn-nA" placeholder="0" min="0" step="1" onfocus="this.select()">
+            </div>
+            <div class="calc-field">
+                <label id="fn-lbl-nB">n(B) — Số phần tử B</label>
+                <input type="number" id="fn-nB" placeholder="0" min="0" step="1" onfocus="this.select()">
+            </div>
+            <div class="calc-field">
+                <label id="fn-lbl-nAB">n(A∩B) — Giao A và B</label>
+                <input type="number" id="fn-nAB" placeholder="0" min="0" step="1" onfocus="this.select()">
+            </div>
+        </div>
+        <div id="fn-error" style="color:#f87171;font-size:.73rem;text-align:center;min-height:1.2em;margin-top:6px;font-family:var(--font-viet);"></div>
+        <!-- Xác suất đã chuyển đổi -->
+        <div style="margin-top:12px;padding:10px 14px;background:rgba(0,242,255,.04);border:1px solid rgba(0,242,255,.12);border-radius:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-family:var(--font-mono);font-size:.76rem;">
+            <span>→ <b style="color:var(--neon-blue);" id="fn-show-pA">P(A) = —</b></span>
+            <span>→ <b style="color:var(--emerald);" id="fn-show-pB">P(B) = —</b></span>
+            <span>→ <b style="color:var(--neon-yellow);" id="fn-show-pAB">P(A∩B) = —</b></span>
+        </div>
+    </div>
+
     <!-- CHẾ ĐỘ -->
     <div style="margin-bottom:20px;">
         <span class="sec-label blue">⚙️ Chế Độ Tính</span>
@@ -338,7 +386,7 @@
 
     <!-- NHẬP LIỆU -->
     <span class="sec-label blue">📥 Nhập Dữ Liệu (bất kỳ ô nào)</span>
-    <div class="calc-grid" style="max-width:700px; margin: 12px auto;">
+    <div class="calc-grid" id="calc-grid-prob" style="max-width:700px; margin: 12px auto; transition: opacity .3s;">
         <div class="calc-field" id="field-pA">
             <label id="lbl-pA">P(A)</label>
             <input type="number" id="pA" step="0.0001" min="0" max="1" placeholder="0.0000" onfocus="this.select()">
@@ -360,7 +408,7 @@
             <input type="number" id="pNotB" step="0.0001" min="0" max="1" placeholder="0.0000" onfocus="this.select()">
         </div>
         <div class="calc-field" id="field-pAuB">
-            <label id="lbl-pAuB">P(A ∪ B) — hợp</label>
+            <label id="lbl-pAuB">P(A ∪ B) — hợp <span style="font-size:.6rem;color:#475569;font-weight:400;">(nhập để suy ra giao)</span></label>
             <input type="number" id="pAuB" step="0.0001" min="0" max="1" placeholder="0.0000" onfocus="this.select()">
         </div>
     </div>
@@ -438,39 +486,17 @@
             <span class="venn-hint" id="venn-hint">Nhập dữ liệu để xem biểu đồ</span>
         </div>
         <div class="venn-canvas-wrap">
-            <svg id="venn-svg" viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg">
-                <!-- Ω box -->
-                <rect x="10" y="10" width="500" height="240" rx="14"
-                      fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
-                <text x="24" y="30" fill="rgba(255,255,255,0.3)" font-size="13" font-family="monospace">Ω</text>
-
-                <!-- Circle A -->
-                <circle id="v-circA" cx="200" cy="130" r="90"
-                        fill="rgba(0,242,255,0.13)" stroke="#00f2ff" stroke-width="2" opacity="0.9"/>
-                <!-- Circle B -->
-                <circle id="v-circB" cx="320" cy="130" r="90"
-                        fill="rgba(16,185,129,0.13)" stroke="#10b981" stroke-width="2" opacity="0.9"/>
-
-                <!-- Intersection fill -->
-                <clipPath id="clipA"><circle cx="200" cy="130" r="90"/></clipPath>
-                <circle id="v-inter" cx="320" cy="130" r="90"
-                        fill="rgba(255,229,0,0.22)" clip-path="url(#clipA)" stroke="none"/>
-
-                <!-- Labels -->
-                <text id="v-lA"    x="148" y="126" fill="#00f2ff"  font-size="12" font-family="monospace" text-anchor="middle" font-weight="bold"></text>
-                <text id="v-lA2"   x="148" y="142" fill="#00f2ff"  font-size="11" font-family="monospace" text-anchor="middle"></text>
-                <text id="v-lB"    x="372" y="126" fill="#10b981"  font-size="12" font-family="monospace" text-anchor="middle" font-weight="bold"></text>
-                <text id="v-lB2"   x="372" y="142" fill="#10b981"  font-size="11" font-family="monospace" text-anchor="middle"></text>
-                <text id="v-lAnB"  x="260" y="124" fill="#ffe500"  font-size="11" font-family="monospace" text-anchor="middle" font-weight="bold"></text>
-                <text id="v-lAnB2" x="260" y="140" fill="#ffe500"  font-size="10" font-family="monospace" text-anchor="middle"></text>
-                <text id="v-lOut"  x="468" y="244" fill="rgba(255,255,255,0.3)" font-size="10" font-family="monospace" text-anchor="middle"></text>
-
-                <!-- Hover zones (invisible, for tooltip) -->
-                <clipPath id="clipAonly"><circle cx="200" cy="130" r="90"/></clipPath>
-                <rect id="v-zone-out"  x="10"  y="10"  width="500" height="240" fill="transparent" rx="14"/>
-                <circle id="v-zone-A"  cx="200" cy="130" r="90" fill="transparent"/>
-                <circle id="v-zone-B"  cx="320" cy="130" r="90" fill="transparent"/>
-                <circle id="v-zone-AB" cx="320" cy="130" r="90" fill="transparent" clip-path="url(#clipA)"/>
+            <svg id="venn-svg" viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg"
+                 style="min-height:160px;">
+                <!-- drawVenn() sẽ rebuild nội dung hoàn toàn -->
+                <rect x="4" y="4" width="552" height="272" rx="16"
+                      fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                <text x="20" y="28" fill="rgba(255,255,255,0.3)" font-size="14"
+                      font-family="monospace" font-weight="bold">&#937;</text>
+                <text x="280" y="150" fill="rgba(255,255,255,0.18)" font-size="13"
+                      font-family="monospace" text-anchor="middle" font-style="italic">
+                    Nha^p du lieu de xem bieu do...
+                </text>
             </svg>
             <!-- SVG Tooltip -->
             <div class="venn-tooltip" id="venn-tooltip"></div>
@@ -496,7 +522,7 @@
     </div>
 
     <div style="margin-top:20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-        <button class="btn" onclick="resetProb()">🔄 Làm Mới</button>
+        <button class="btn" onclick="resetProbFull()">🔄 Làm Mới</button>
     </div>
 
     <div class="status-bar" style="max-width:600px; margin:12px auto 0;">
@@ -644,6 +670,128 @@
 
 <script src="script.js"></script>
 <script>
+/* ============================================================
+   CHẾ ĐỘ NHẬP: CHUYỂN ĐỔI TẦN SỐ vs XÁC SUẤT
+============================================================ */
+let _inputMode = 'prob';
+
+function switchInputMode(mode) {
+    _inputMode = mode;
+    const panelFreq = document.getElementById('panel-freq-input');
+    const panelProb = document.getElementById('calc-grid-prob');
+    const btnProb   = document.getElementById('btn-mode-prob');
+    const btnFreq   = document.getElementById('btn-mode-freq');
+    const hint      = document.getElementById('input-mode-hint');
+    if (mode === 'freq') {
+        panelFreq.style.display = 'block';
+        if (panelProb) { panelProb.style.opacity = '0.45'; panelProb.style.pointerEvents = 'none'; }
+        btnFreq.style.cssText += ';background:rgba(255,229,0,.18);color:var(--neon-yellow);box-shadow:0 0 16px rgba(255,229,0,.18);';
+        btnProb.style.cssText += ';background:transparent;color:#64748b;box-shadow:none;';
+        hint.textContent = 'Nhập số phần tử n(Ω), n(A), n(B), n(A∩B) — hệ thống tự tính xác suất';
+    } else {
+        panelFreq.style.display = 'none';
+        if (panelProb) { panelProb.style.opacity = '1'; panelProb.style.pointerEvents = 'all'; }
+        btnProb.style.cssText += ';background:rgba(0,242,255,.18);color:var(--neon-blue);box-shadow:0 0 16px rgba(0,242,255,.18);';
+        btnFreq.style.cssText += ';background:transparent;color:#64748b;box-shadow:none;';
+        hint.textContent = 'Nhập trực tiếp xác suất P(A), P(B), P(A∩B) từ 0 đến 1';
+    }
+}
+
+function computeFromFreq() {
+    const nO  = parseFloat(document.getElementById('fn-nO')?.value)  || 0;
+    const nA  = parseFloat(document.getElementById('fn-nA')?.value)  || 0;
+    const nB  = parseFloat(document.getElementById('fn-nB')?.value)  || 0;
+    const nAB = parseFloat(document.getElementById('fn-nAB')?.value) || 0;
+    const errEl = document.getElementById('fn-error');
+    if (nO <= 0) { if(errEl) errEl.textContent = ''; return; }
+    const errs = [];
+    if (nA  > nO) errs.push(`n(A)=${nA} > n(Ω)=${nO}`);
+    if (nB  > nO) errs.push(`n(B)=${nB} > n(Ω)=${nO}`);
+    if (nAB > nA) errs.push(`n(A∩B)=${nAB} > n(A)=${nA}`);
+    if (nAB > nB) errs.push(`n(A∩B)=${nAB} > n(B)=${nB}`);
+    if (nA + nB - nAB > nO) errs.push(`n(A∪B)=${nA+nB-nAB} > n(Ω)=${nO}`);
+    if (errs.length) { if(errEl) errEl.textContent = '⚠️ ' + errs.join(' | '); return; }
+    if(errEl) errEl.textContent = '';
+    const sr = v => (Math.round(v*10000)/10000).toString();
+    const pA  = nA  / nO, pB  = nB  / nO, pAB = nAB / nO;
+    const show = (id,t) => { const e=document.getElementById(id); if(e) e.textContent=t; };
+    show('fn-show-pA',  `P(A) = ${nA}/${nO} = ${sr(pA)}`);
+    show('fn-show-pB',  `P(B) = ${nB}/${nO} = ${sr(pB)}`);
+    show('fn-show-pAB', `P(A∩B) = ${nAB}/${nO} = ${sr(pAB)}`);
+    const si = (id,v) => { const e=document.getElementById(id); if(e) e.value=sr(v); };
+    si('pA', pA); si('pB', pB); si('pAnB', pAB);
+    si('pNotA', 1-pA); si('pNotB', 1-pB);
+    // Chuyển về chế độ tùy biến
+    const mNone = document.querySelector('input[name="mode"][value="none"]');
+    if(mNone) { mNone.checked = true; _syncRadioLabels(); }
+    _runProbCalc(pA, pB, pAB);
+}
+
+function _syncRadioLabels() {
+    const map = {none:'lbl-none', xungkhac:'lbl-xk', doclap:'lbl-dl'};
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+        const lbl = document.getElementById(map[r.value]);
+        if(lbl) lbl.classList.toggle('selected', r.checked);
+    });
+}
+
+function _runProbCalc(pA, pB, pAnB) {
+    const mode = document.querySelector('input[name="mode"]:checked')?.value || 'none';
+    if (mode === 'xungkhac') { pAnB = 0; const e=document.getElementById('pAnB'); if(e) e.value='0'; }
+    else if (mode === 'doclap') { pAnB = pA*pB; const e=document.getElementById('pAnB'); if(e) e.value=smartRound(pAnB); }
+    const pAuB = pA + pB - pAnB;
+    setVal('res-pA',         pA);
+    setVal('res-pB',         pB);
+    setVal('res-pNotA',      1 - pA);
+    setVal('res-pNotB',      1 - pB);
+    setVal('res-pAnB',       pAnB);
+    setVal('res-pAuB',       pAuB);
+    setVal('res-pAnBnot',    Math.max(0, pA  - pAnB));
+    setVal('res-pNotAnB',    Math.max(0, pB  - pAnB));
+    setVal('res-pNotAnBnot', Math.max(0, 1   - pAuB));
+    setVal('res-pAxB',       Math.max(0, pA  - pAnB) + Math.max(0, pB - pAnB));
+    const el = id => document.getElementById(id);
+    const isXK = pAnB === 0;
+    const isDL = Math.abs(pAnB - pA*pB) < 1e-6;
+    if(el('res-xungkhac')) el('res-xungkhac').innerText = isXK ? 'Có ✅' : 'Không ❌';
+    if(el('res-doclap'))   el('res-doclap').innerText   = isDL ? 'Có ✅' : 'Không ❌';
+    if(el('prob-status'))  el('prob-status').innerText  = 'Đã cập nhật dữ liệu.';
+}
+
+// Hook tần số inputs
+['fn-nO','fn-nA','fn-nB','fn-nAB'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', computeFromFreq);
+});
+
+// Hook thay đổi radio chế độ
+document.querySelectorAll('input[name="mode"]').forEach(r => {
+    r.addEventListener('change', () => {
+        _syncRadioLabels();
+        const pA   = parseFloat(document.getElementById('pA')?.value)   || 0;
+        const pB   = parseFloat(document.getElementById('pB')?.value)   || 0;
+        const pAnB = parseFloat(document.getElementById('pAnB')?.value) || 0;
+        _runProbCalc(pA, pB, pAnB);
+    });
+});
+
+// Patch script.js input handler: hỗ trợ pAuB ngược + pNotA/pNotB ngược
+document.addEventListener('input', (e) => {
+    const id = e.target.id;
+    if (!document.getElementById('pA')) return;
+    // Xử lý nhập pAuB: tính lại pAnB nếu mode=none và có pA,pB
+    if (id === 'pAuB') {
+        const pA   = parseFloat(document.getElementById('pA').value)   || 0;
+        const pB   = parseFloat(document.getElementById('pB').value)   || 0;
+        const pAuB = parseFloat(document.getElementById('pAuB').value);
+        if (!isNaN(pAuB) && pA > 0 && pB > 0) {
+            const pAnB = Math.max(0, pA + pB - pAuB);
+            document.getElementById('pAnB').value = smartRound(pAnB);
+            _runProbCalc(pA, pB, pAnB);
+        }
+    }
+}, true); // capture phase, trước handler của script.js
+</script>
+<script>
 // ======== CHEAT SHEET + TOOLTIP (probability.html) ========
 const PROB_TOOLTIPS = {
     'pA':     { label:'P(A)', desc:'Xác suất biến cố A xảy ra. Giá trị từ 0 đến 1.', formula:'0 ≤ P(A) ≤ 1' },
@@ -696,6 +844,12 @@ function updateProbNilLabels() {
         sessionStorage.setItem('ml_' + id, el.value);
         updateProbNilLabels();
         updateProbLabels(); // keep result labels in sync
+        // Cập nhật nhãn freq input
+        const n = getNames();
+        const setTxt = (id, t) => { const e=document.getElementById(id); if(e) e.textContent=t; };
+        setTxt('fn-lbl-nA',  `n(${n.A}) — Số phần tử ${n.A}`);
+        setTxt('fn-lbl-nB',  `n(${n.B}) — Số phần tử ${n.B}`);
+        setTxt('fn-lbl-nAB', `n(${n.A}∩${n.B}) — Giao ${n.A} và ${n.B}`);
     });
 });
 updateProbNilLabels();
@@ -703,156 +857,303 @@ updateProbLabels();
 </script>
 <script>
 /* ============================================================
-   VENN DIAGRAM + STEP-BY-STEP SOLUTION ENGINE
-   probability.html
+   VENN DIAGRAM + STEP-BY-STEP SOLUTION ENGINE  v2.0
+   probability.html  —  by Minh Nhựt
 ============================================================ */
 
 // ── shared state ──────────────────────────────────────────
 let _lastVals = { pA:0, pB:0, pAnB:0 };
 
-// ── called from script.js input handler ───────────────────
-function updateVennAndSteps(pA, pB, pAnB) {
-    _lastVals = { pA, pB, pAnB };
-    drawVenn(pA, pB, pAnB);
-    buildSteps(pA, pB, pAnB);
+// ── TRIGGER: patch setVal to fire our update ──────────────
+const _origSetVal = window.setVal;
+window.setVal = function(id, v) {
+    _origSetVal(id, v);
+    if (id === 'res-pAuB') {
+        const pA   = parseFloat(document.getElementById('pA')?.value)   || 0;
+        const pB   = parseFloat(document.getElementById('pB')?.value)   || 0;
+        const pAnB = parseFloat(document.getElementById('pAnB')?.value) || 0;
+        _scheduleUpdate(pA, pB, pAnB);
+    }
+};
+
+let _updateTimer = null;
+function _scheduleUpdate(pA, pB, pAnB) {
+    clearTimeout(_updateTimer);
+    _updateTimer = setTimeout(() => {
+        _lastVals = { pA, pB, pAnB };
+        drawVenn(pA, pB, pAnB);
+        buildSteps(pA, pB, pAnB);
+    }, 16);
 }
 
 /* ============================================================
-   1. VENN DIAGRAM
+   1. VENN DIAGRAM — động theo xác suất
+   Thuật toán:
+   - Bán kính rA ∝ sqrt(pA), rB ∝ sqrt(pB) (diện tích ~ xác suất)
+   - Khoảng cách tâm d được tính ngược từ diện tích giao thực
+     bằng Newton's method trên công thức lens area
+   - Khi pAnB=0 (xung khắc): 2 vòng tách biệt hoàn toàn
+   - Khi pAnB=min(pA,pB) (một chứa trong một): lồng vào nhau
 ============================================================ */
 function drawVenn(pA, pB, pAnB) {
-    const hint = document.getElementById('venn-hint');
-    const svg  = document.getElementById('venn-svg');
+    const svg = document.getElementById('venn-svg');
     if (!svg) return;
 
+    const hint = document.getElementById('venn-hint');
     const hasData = (pA > 0 || pB > 0);
-    hint.textContent = hasData ? '' : 'Nhập dữ liệu để xem biểu đồ';
+    if (hint) hint.textContent = hasData ? '' : 'Nhập dữ liệu để xem biểu đồ';
 
     const n = getNames();
-    const nameA  = n.A; const nameB  = n.B;
-    const nameNA = n.nA; const nameNB = n.nB;
+    const sr = v => isNaN(v) ? '?' : (Math.round(v * 10000) / 10000).toString();
 
-    // Base circle positions
-    const CY = 130, R = 90;
-    // Overlap distance: shrink gap as pAnB grows relative to min(pA,pB)
-    const maxOverlap = Math.min(pA, pB);
-    const overlapRatio = maxOverlap > 0 ? Math.min(pAnB / maxOverlap, 1) : 0;
-    // cx distance: 180 when no overlap, 120 when full
-    const dist = 180 - overlapRatio * 60;
-    const cxA = 260 - dist / 2;
-    const cxB = 260 + dist / 2;
+    /* --- kích thước SVG cố định --- */
+    const W = 560, H = 280, CY = 140;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-    const circA  = document.getElementById('v-circA');
-    const circB  = document.getElementById('v-circB');
-    const inter  = document.getElementById('v-inter');
-    const clipCir = svg.querySelector('#clipA circle');
+    /* --- bán kính tỉ lệ diện tích --- */
+    const SCALE = 100; // bán kính max khi p=1
+    const minR  = 18;
+    const rA = Math.max(minR, SCALE * Math.sqrt(Math.max(pA, 0)));
+    const rB = Math.max(minR, SCALE * Math.sqrt(Math.max(pB, 0)));
 
-    circA.setAttribute('cx', cxA); circA.setAttribute('cy', CY); circA.setAttribute('r', R);
-    circB.setAttribute('cx', cxB); circB.setAttribute('cy', CY); circB.setAttribute('r', R);
-    inter.setAttribute('cx', cxB); inter.setAttribute('cy', CY); inter.setAttribute('r', R);
-    if (clipCir) { clipCir.setAttribute('cx', cxA); clipCir.setAttribute('cy', CY); clipCir.setAttribute('r', R); }
+    /* --- tính khoảng cách tâm từ pAnB --- */
+    // Diện tích giao mong muốn (đơn vị SVG²), quy về đơn vị xác suất
+    // Ánh xạ: tổng diện tích Ω = π·SCALE² = π·10000
+    const OMEGA_AREA = Math.PI * SCALE * SCALE;
+    const targetInter = pAnB * OMEGA_AREA;
 
-    // Zone circles for hover
-    const zA  = document.getElementById('v-zone-A');
-    const zB  = document.getElementById('v-zone-B');
-    const zAB = document.getElementById('v-zone-AB');
-    if (zA)  { zA.setAttribute('cx',cxA);  zA.setAttribute('cy',CY);  zA.setAttribute('r',R); }
-    if (zB)  { zB.setAttribute('cx',cxB);  zB.setAttribute('cy',CY);  zB.setAttribute('r',R); }
-    if (zAB) { zAB.setAttribute('cx',cxB); zAB.setAttribute('cy',CY); zAB.setAttribute('r',R);
-               const cp = svg.querySelector('#clipA circle');
-               if (cp) { cp.setAttribute('cx', cxA); } }
+    function lensArea(d, r1, r2) {
+        if (d >= r1 + r2) return 0;
+        if (d <= Math.abs(r1 - r2)) return Math.PI * Math.min(r1, r2) ** 2;
+        const a1 = 2 * Math.acos((d*d + r1*r1 - r2*r2) / (2*d*r1));
+        const a2 = 2 * Math.acos((d*d + r2*r2 - r1*r1) / (2*d*r2));
+        return 0.5 * r1*r1 * (a1 - Math.sin(a1)) + 0.5 * r2*r2 * (a2 - Math.sin(a2));
+    }
 
-    const sr = v => isNaN(v) ? '?' : (Math.round(v*10000)/10000).toString();
+    // Tìm d bằng binary search
+    let d;
+    if (pAnB <= 0) {
+        d = rA + rB + 20; // tách biệt
+    } else {
+        const dMin = Math.abs(rA - rB);
+        const dMax = rA + rB;
+        let lo = dMin, hi = dMax, mid;
+        for (let i = 0; i < 64; i++) {
+            mid = (lo + hi) / 2;
+            if (lensArea(mid, rA, rB) > targetInter) lo = mid; else hi = mid;
+        }
+        d = (lo + hi) / 2;
+        // Clamp: nếu diện tích max < target → lồng nhau
+        if (lensArea(dMin, rA, rB) < targetInter) d = dMin;
+    }
 
-    // Label positions
-    const midX = (cxA + cxB) / 2;
-    const lAx  = cxA - (cxB - cxA) * 0.28;
-    const lBx  = cxB + (cxB - cxA) * 0.28;
+    /* --- vị trí tâm, căn giữa khung --- */
+    const margin = Math.max(rA, rB) + 22;
+    const totalW = d + rA + rB;
+    const startX = (W - Math.min(totalW, W - 2*22)) / 2;
+    const cxA = startX + rA;
+    const cxB = Math.min(cxA + d, W - rB - 22);
+    const safeCxA = Math.max(rA + 22, cxA);
 
-    const set = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
-    set('v-lA',    nameA);
-    set('v-lA2',   'P = ' + sr(pA));
-    set('v-lB',    nameB);
-    set('v-lB2',   'P = ' + sr(pB));
-    set('v-lAnB',  pAnB > 0 ? '∩' : '');
-    set('v-lAnB2', pAnB > 0 ? sr(pAnB) : '');
+    /* --- màu & fill --- */
+    const opA  = Math.min(0.9, 0.25 + pA * 0.5);
+    const opB  = Math.min(0.9, 0.25 + pB * 0.5);
+    const opAB = pAnB > 0 ? Math.min(0.95, 0.35 + pAnB * 1.2) : 0;
 
-    const pAuB = pA + pB - pAnB;
-    set('v-lOut',  '1−P(∪)=' + sr(1 - pAuB));
+    /* --- rebuild SVG nội dung (giữ phần static bên ngoài) --- */
+    const defs = svg.querySelector('defs') || document.createElementNS('http://www.w3.org/2000/svg','defs');
+    defs.innerHTML = `
+        <clipPath id="clipA2">
+            <circle cx="${safeCxA}" cy="${CY}" r="${rA}"/>
+        </clipPath>
+        <filter id="glow-a" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="6" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-b" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="6" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="gradA" cx="40%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#00f2ff" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#00f2ff" stop-opacity="0.08"/>
+        </radialGradient>
+        <radialGradient id="gradB" cx="60%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#10b981" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#10b981" stop-opacity="0.08"/>
+        </radialGradient>
+        <radialGradient id="gradAB" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#ffe500" stop-opacity="0.7"/>
+            <stop offset="100%" stop-color="#ff9500" stop-opacity="0.2"/>
+        </radialGradient>
+    `;
+    if (!svg.querySelector('defs')) svg.insertBefore(defs, svg.firstChild);
 
-    // Reposition text labels
-    const moveText = (id, x, y) => {
-        const el = document.getElementById(id);
-        if (el) { el.setAttribute('x', x); el.setAttribute('y', y); }
-    };
-    moveText('v-lA',   lAx, CY - 8);
-    moveText('v-lA2',  lAx, CY + 8);
-    moveText('v-lB',   lBx, CY - 8);
-    moveText('v-lB2',  lBx, CY + 8);
-    moveText('v-lAnB', midX, CY - 4);
-    moveText('v-lAnB2',midX, CY + 12);
+    /* vị trí nhãn */
+    const midX   = (safeCxA + cxB) / 2;
+    const spread = Math.max(d * 0.35, 30);
+    const lAx    = Math.max(22, safeCxA - spread);
+    const lBx    = Math.min(W - 22, cxB + spread);
 
-    // Update legend
+    /* phần riêng chỉ A / chỉ B */
+    const pOnlyA = Math.max(0, pA - pAnB);
+    const pOnlyB = Math.max(0, pB - pAnB);
+    const pAuB   = pA + pB - pAnB;
+    const pOut   = Math.max(0, 1 - pAuB);
+
+    /* xung khắc hoàn toàn? */
+    const isXK = pAnB === 0 && pA > 0 && pB > 0;
+
+    svg.innerHTML = `
+        <defs>
+            <clipPath id="clipA2">
+                <circle cx="${safeCxA}" cy="${CY}" r="${rA}"/>
+            </clipPath>
+            <radialGradient id="gradA" cx="40%" cy="40%" r="60%">
+                <stop offset="0%"   stop-color="#00f2ff" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#0077ff" stop-opacity="0.08"/>
+            </radialGradient>
+            <radialGradient id="gradB" cx="60%" cy="40%" r="60%">
+                <stop offset="0%"   stop-color="#10b981" stop-opacity="0.5"/>
+                <stop offset="100%" stop-color="#059669" stop-opacity="0.08"/>
+            </radialGradient>
+            <radialGradient id="gradAB" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="#ffe500" stop-opacity="0.75"/>
+                <stop offset="100%" stop-color="#ff9500" stop-opacity="0.25"/>
+            </radialGradient>
+            <filter id="softglow">
+                <feGaussianBlur stdDeviation="5" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <!-- Ω frame -->
+        <rect x="4" y="4" width="${W-8}" height="${H-8}" rx="16"
+              fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+        <text x="18" y="26" fill="rgba(255,255,255,0.28)" font-size="14"
+              font-family="monospace" font-weight="bold">Ω</text>
+
+        <!-- "Ngoài hợp" label -->
+        <text x="${W-16}" y="${H-10}" fill="rgba(255,255,255,0.28)" font-size="10"
+              font-family="monospace" text-anchor="end">
+            P(${n.nA}∩${n.nB}) = ${sr(pOut)}
+        </text>
+
+        <!-- Vòng A -->
+        <circle cx="${safeCxA}" cy="${CY}" r="${rA}"
+                fill="url(#gradA)" stroke="#00f2ff" stroke-width="2"
+                opacity="${opA}" filter="url(#softglow)"/>
+
+        <!-- Vòng B -->
+        <circle cx="${cxB}" cy="${CY}" r="${rB}"
+                fill="url(#gradB)" stroke="#10b981" stroke-width="2"
+                opacity="${opB}" filter="url(#softglow)"/>
+
+        <!-- Giao (clip vào A) -->
+        ${pAnB > 0 ? `
+        <circle cx="${cxB}" cy="${CY}" r="${rB}"
+                fill="url(#gradAB)" clip-path="url(#clipA2)"
+                opacity="${opAB}" stroke="none"/>
+        ` : ''}
+
+        <!-- Nhãn A -->
+        <text x="${lAx}" y="${CY - rA*0.22}" fill="#00f2ff"
+              font-size="${Math.min(14, rA*0.38)}" font-family="monospace"
+              text-anchor="middle" font-weight="bold">${n.A}</text>
+        <text x="${lAx}" y="${CY - rA*0.22 + 16}" fill="#00f2ff"
+              font-size="${Math.min(11, rA*0.28)}" font-family="monospace"
+              text-anchor="middle">P=${sr(pA)}</text>
+        ${pOnlyA > 0 ? `
+        <text x="${lAx}" y="${CY + rA*0.15}" fill="rgba(0,242,255,0.6)"
+              font-size="${Math.min(10, rA*0.25)}" font-family="monospace"
+              text-anchor="middle">chỉ A=${sr(pOnlyA)}</text>
+        ` : ''}
+
+        <!-- Nhãn B -->
+        <text x="${lBx}" y="${CY - rB*0.22}" fill="#10b981"
+              font-size="${Math.min(14, rB*0.38)}" font-family="monospace"
+              text-anchor="middle" font-weight="bold">${n.B}</text>
+        <text x="${lBx}" y="${CY - rB*0.22 + 16}" fill="#10b981"
+              font-size="${Math.min(11, rB*0.28)}" font-family="monospace"
+              text-anchor="middle">P=${sr(pB)}</text>
+        ${pOnlyB > 0 ? `
+        <text x="${lBx}" y="${CY + rB*0.15}" fill="rgba(16,185,129,0.6)"
+              font-size="${Math.min(10, rB*0.25)}" font-family="monospace"
+              text-anchor="middle">chỉ B=${sr(pOnlyB)}</text>
+        ` : ''}
+
+        <!-- Nhãn giao -->
+        ${pAnB > 0 ? `
+        <text x="${midX}" y="${CY - 8}" fill="#ffe500"
+              font-size="12" font-family="monospace"
+              text-anchor="middle" font-weight="bold">∩</text>
+        <text x="${midX}" y="${CY + 8}" fill="#ffe500"
+              font-size="11" font-family="monospace"
+              text-anchor="middle">${sr(pAnB)}</text>
+        ` : isXK ? `
+        <text x="${W/2}" y="${H - 18}" fill="rgba(255,100,100,0.7)"
+              font-size="10" font-family="monospace" text-anchor="middle"
+              font-style="italic">Xung khắc — không giao nhau</text>
+        ` : ''}
+
+        <!-- Hover zones (trong suốt, xử lý tooltip) -->
+        <rect id="v-zone-out"  x="4" y="4" width="${W-8}" height="${H-8}" fill="transparent" rx="16"/>
+        <circle id="v-zone-A"  cx="${safeCxA}" cy="${CY}" r="${rA}" fill="transparent"/>
+        <circle id="v-zone-B"  cx="${cxB}"     cy="${CY}" r="${rB}" fill="transparent"/>
+        <clipPath id="clipA3"><circle cx="${safeCxA}" cy="${CY}" r="${rA}"/></clipPath>
+        <circle id="v-zone-AB" cx="${cxB}" cy="${CY}" r="${rB}"
+                fill="transparent" clip-path="url(#clipA3)"/>
+    `;
+
+    /* --- Legend --- */
     const pAnBnotVal = Math.max(0, pA - pAnB);
     const pNotAnBVal = Math.max(0, pB - pAnB);
-    const pOut       = Math.max(0, 1 - pAuB);
-    set('vl-A',   `${nameA} only = ${sr(pAnBnotVal)}`);
-    set('vl-AB',  `${nameA}∩${nameB} = ${sr(pAnB)}`);
-    set('vl-B',   `${nameB} only = ${sr(pNotAnBVal)}`);
+    const set = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
+    set('vl-A',   `${n.A} only = ${sr(pAnBnotVal)}`);
+    set('vl-AB',  `${n.A}∩${n.B} = ${sr(pAnB)}`);
+    set('vl-B',   `${n.B} only = ${sr(pNotAnBVal)}`);
     set('vl-out', `Ngoài = ${sr(pOut)}`);
+
+    /* --- re-attach hover zones sau khi innerHTML reset --- */
+    _attachVennHover();
 }
 
-// ── Venn hover tooltips ───────────────────────────────────
-(function initVennHover() {
-    const tip = document.getElementById('venn-tooltip');
-    if (!tip) return;
+/* ── Venn hover tooltips ─────────────────────────────────── */
+function _attachVennHover() {
+    const tip  = document.getElementById('venn-tooltip');
     const wrap = document.querySelector('.venn-canvas-wrap');
-    const n    = () => getNames();
+    if (!tip || !wrap) return;
 
-    function showTip(e, html) {
-        tip.innerHTML = html; tip.classList.add('show');
-        moveTip(e);
-    }
+    const n = () => getNames();
+    function showTip(e, html) { tip.innerHTML = html; tip.classList.add('show'); moveTip(e); }
     function moveTip(e) {
         const rect = wrap.getBoundingClientRect();
-        let x = e.clientX - rect.left + 12;
-        let y = e.clientY - rect.top  - 10;
-        if (x + 200 > rect.width) x -= 215;
+        let x = e.clientX - rect.left + 14;
+        let y = e.clientY - rect.top  - 14;
+        if (x + 220 > rect.width)  x -= 236;
+        if (y < 0) y = e.clientY - rect.top + 14;
         tip.style.left = x + 'px'; tip.style.top = y + 'px';
     }
     function hideTip() { tip.classList.remove('show'); }
 
     const zones = [
-        { id:'v-zone-AB', label: () => `P(${n().A} ∩ ${n().B})`, val: () => _lastVals.pAnB, color:'#ffe500' },
-        { id:'v-zone-A',  label: () => `P(${n().A}) = ${smartRound(_lastVals.pA)}`, val: () => Math.max(0, _lastVals.pA - _lastVals.pAnB), color:'#00f2ff', sublabel: () => `Chỉ ${n().A}, không ${n().B}` },
-        { id:'v-zone-B',  label: () => `P(${n().B}) = ${smartRound(_lastVals.pB)}`, val: () => Math.max(0, _lastVals.pB - _lastVals.pAnB), color:'#10b981', sublabel: () => `Chỉ ${n().B}, không ${n().A}` },
+        { id:'v-zone-AB',
+          html: () => `<span class="vt-label" style="color:#ffe500">P(${n().A} ∩ ${n().B})</span><span class="vt-val" style="color:#ffe500">${smartRound(_lastVals.pAnB)}</span>` },
+        { id:'v-zone-A',
+          html: () => `<span class="vt-label" style="color:#00f2ff">P(${n().A}) = ${smartRound(_lastVals.pA)}</span><span class="vt-label">Chỉ ${n().A}, không ${n().B}</span><span class="vt-val" style="color:#00f2ff">${smartRound(Math.max(0,_lastVals.pA-_lastVals.pAnB))}</span>` },
+        { id:'v-zone-B',
+          html: () => `<span class="vt-label" style="color:#10b981">P(${n().B}) = ${smartRound(_lastVals.pB)}</span><span class="vt-label">Chỉ ${n().B}, không ${n().A}</span><span class="vt-val" style="color:#10b981">${smartRound(Math.max(0,_lastVals.pB-_lastVals.pAnB))}</span>` },
+        { id:'v-zone-out',
+          html: () => { const pAuB = _lastVals.pA + _lastVals.pB - _lastVals.pAnB; return `<span class="vt-label">Ngoài P(${n().A}∪${n().B})</span><span class="vt-val" style="color:rgba(255,255,255,.6)">${smartRound(Math.max(0,1-pAuB))}</span>`; } },
     ];
 
     zones.forEach(z => {
         const el = document.getElementById(z.id);
         if (!el) return;
-        el.addEventListener('mousemove', e => {
-            showTip(e,
-                `<span class="vt-label" style="color:${z.color}">${z.label()}</span>`
-                + (z.sublabel ? `<span class="vt-label">${z.sublabel()}</span>` : '')
-                + `<span class="vt-val" style="color:${z.color}">${smartRound(z.val())}</span>`
-            );
-            moveTip(e);
-        });
+        el.addEventListener('mousemove', e => { showTip(e, z.html()); moveTip(e); });
         el.addEventListener('mouseleave', hideTip);
     });
-
-    document.getElementById('v-zone-out')?.addEventListener('mousemove', e => {
-        const pAuB = _lastVals.pA + _lastVals.pB - _lastVals.pAnB;
-        showTip(e,
-            `<span class="vt-label">Ngoài P(${n().A}∪${n().B})</span>`
-            + `<span class="vt-val" style="color:rgba(255,255,255,.6)">${smartRound(Math.max(0,1-pAuB))}</span>`
-        );
-        moveTip(e);
-    });
-    document.getElementById('v-zone-out')?.addEventListener('mouseleave', hideTip);
-})();
-
+}
 
 /* ============================================================
    2. STEP-BY-STEP SOLUTION
@@ -867,9 +1168,10 @@ function buildSteps(pA, pB, pAnB) {
         return;
     }
 
-    const n       = getNames();
-    const A = n.A, B = n.B, nA = n.nA, nB = n.nB;
-    const sr      = v => (Math.round(v * 10000) / 10000).toString();
+    const n = getNames();
+    const A=n.A, B=n.B, nA=n.nA, nB=n.nB;
+    const sr = v => (Math.round(v * 10000) / 10000).toString();
+
     const pNotA   = 1 - pA;
     const pNotB   = 1 - pB;
     const pAuB    = pA + pB - pAnB;
@@ -881,82 +1183,68 @@ function buildSteps(pA, pB, pAnB) {
     const isDL    = Math.abs(pAnB - pA * pB) < 1e-6;
 
     const mode = document.querySelector('input[name="mode"]:checked')?.value || 'none';
-    const modeNote = mode === 'xungkhac' ? `(chế độ: <b>xung khắc</b> — P(${A}∩${B}) = 0)`
-                   : mode === 'doclap'   ? `(chế độ: <b>độc lập</b> — P(${A}∩${B}) = P(${A})·P(${B}))`
-                   : '';
+    const modeNote = mode === 'xungkhac'
+        ? `(chế độ: <b>xung khắc</b> — P(${A}∩${B}) = 0)`
+        : mode === 'doclap'
+        ? `(chế độ: <b>độc lập</b> — P(${A}∩${B}) = P(${A})·P(${B}))`
+        : '';
 
-    const steps = [];
+    const steps = [
+        {
+            num:'①', cls:'blue',
+            title: 'Dữ Liệu Đã Nhập',
+            formula: `<span class="hi-b">P(${A})</span> = ${sr(pA)}&emsp;<span class="hi-g">P(${B})</span> = ${sr(pB)}&emsp;<span class="hi-y">P(${A}∩${B})</span> = ${sr(pAnB)}`,
+            note: modeNote || 'Đây là 3 giá trị cơ bản để suy ra tất cả xác suất còn lại.'
+        },
+        {
+            num:'②', cls:'pink',
+            title: `Xác Suất Bù — P(${nA}) và P(${nB})`,
+            formula: `<span class="hi-p">P(${nA})</span> = 1 − P(${A}) = 1 − ${sr(pA)} = <span class="hi-p">${sr(pNotA)}</span><br>
+                      <span class="hi-p">P(${nB})</span> = 1 − P(${B}) = 1 − ${sr(pB)} = <span class="hi-p">${sr(pNotB)}</span>`,
+            note: `Biến cố bù: P(A) + P(A') = 1 với mọi biến cố A.`
+        },
+        {
+            num:'③', cls:'green',
+            title: `Hợp — P(${A}∪${B})`,
+            formula: `P(${A}∪${B}) = P(${A}) + P(${B}) − P(${A}∩${B})<br>
+                      = ${sr(pA)} + ${sr(pB)} − ${sr(pAnB)} = <span class="hi-g">${sr(pAuB)}</span>`,
+            note: 'Công thức cộng xác suất. Trừ giao để tránh đếm hai lần.'
+        },
+        {
+            num:'④', cls:'purple',
+            title: `Phần Riêng — P(${A}∩${nB}) và P(${nA}∩${B})`,
+            formula: `P(${A}∩${nB}) = P(${A}) − P(${A}∩${B}) = ${sr(pA)} − ${sr(pAnB)} = <span class="hi-v">${sr(pAnBnot)}</span><br>
+                      P(${nA}∩${B}) = P(${B}) − P(${A}∩${B}) = ${sr(pB)} − ${sr(pAnB)} = <span class="hi-v">${sr(pNAnB)}</span>`,
+            note: `Phần chỉ ${A}: thuộc A nhưng không thuộc ${B}. Phần chỉ ${B}: ngược lại.`
+        },
+        {
+            num:'⑤', cls:'orange',
+            title: `Ngoài Hợp — P(${nA}∩${nB})`,
+            formula: `P(${nA}∩${nB}) = 1 − P(${A}∪${B}) = 1 − ${sr(pAuB)} = <span class="hi-o">${sr(pNAnBnot)}</span>`,
+            note: `Phần không thuộc ${A} và cũng không thuộc ${B}.`
+        },
+        {
+            num:'⑥', cls:'teal',
+            title: `Hiệu Xứng — P(${A}△${B})`,
+            formula: `P(${A}△${B}) = P(${A}∩${nB}) + P(${nA}∩${B})<br>
+                      = ${sr(pAnBnot)} + ${sr(pNAnB)} = <span style="color:#2dd4bf;font-weight:700">${sr(pAxB)}</span>`,
+            note: 'Hiệu xứng: những phần tử thuộc đúng một trong hai biến cố.'
+        },
+        {
+            num:'⑦', cls:'yellow',
+            title: 'Kiểm Tra Quan Hệ',
+            formula: [
+                isXK
+                    ? `✅ <b>Xung khắc</b>: P(${A}∩${B}) = 0 → ${A} và ${B} không thể cùng xảy ra.`
+                    : `❌ Không xung khắc: P(${A}∩${B}) = ${sr(pAnB)} ≠ 0`,
+                isDL
+                    ? `✅ <b>Độc lập</b>: P(${A}∩${B}) = P(${A})·P(${B}) = ${sr(pA*pB)}`
+                    : `❌ Không độc lập: P(${A}∩${B}) = ${sr(pAnB)} ≠ P(${A})·P(${B}) = ${sr(pA*pB)}`
+            ].join('<br>'),
+            note: 'Hai biến cố vừa xung khắc vừa độc lập chỉ khi P(A)=0 hoặc P(B)=0.'
+        }
+    ];
 
-    // ① Dữ liệu đầu vào
-    steps.push({
-        num:'①', cls:'blue',
-        title: 'Dữ Liệu Đã Nhập',
-        formula: `<span class="hi-b">P(${A})</span> = ${sr(pA)}&emsp;
-                  <span class="hi-g">P(${B})</span> = ${sr(pB)}&emsp;
-                  <span class="hi-y">P(${A}∩${B})</span> = ${sr(pAnB)}`,
-        note: modeNote || `Đây là 3 giá trị cơ bản để suy ra tất cả xác suất còn lại.`
-    });
-
-    // ② Bù
-    steps.push({
-        num:'②', cls:'pink',
-        title: `Xác Suất Bù — P(${nA}) và P(${nB})`,
-        formula: `<span class="hi-p">P(${nA})</span> = 1 − P(${A}) = 1 − ${sr(pA)} = <span class="hi-p">${sr(pNotA)}</span><br>
-                  <span class="hi-p">P(${nB})</span> = 1 − P(${B}) = 1 − ${sr(pB)} = <span class="hi-p">${sr(pNotB)}</span>`,
-        note: 'Biến cố bù: P(A) + P(A') = 1 với mọi biến cố A.'
-    });
-
-    // ③ Hợp
-    steps.push({
-        num:'③', cls:'green',
-        title: `Hợp — P(${A}∪${B})`,
-        formula: `P(${A}∪${B}) = P(${A}) + P(${B}) − P(${A}∩${B})<br>
-                  = ${sr(pA)} + ${sr(pB)} − ${sr(pAnB)}<br>
-                  = <span class="hi-g">${sr(pAuB)}</span>`,
-        note: 'Công thức cộng xác suất. Trừ giao để tránh đếm hai lần.'
-    });
-
-    // ④ Phần chỉ A / chỉ B
-    steps.push({
-        num:'④', cls:'purple',
-        title: `Phần Riêng — P(${A}∩${nB}) và P(${nA}∩${B})`,
-        formula: `P(${A}∩${nB}) = P(${A}) − P(${A}∩${B}) = ${sr(pA)} − ${sr(pAnB)} = <span class="hi-v">${sr(pAnBnot)}</span><br>
-                  P(${nA}∩${B}) = P(${B}) − P(${A}∩${B}) = ${sr(pB)} − ${sr(pAnB)} = <span class="hi-v">${sr(pNAnB)}</span>`,
-        note: `Phần chỉ ${A}: thuộc A nhưng không thuộc ${B}. Phần chỉ ${B}: ngược lại.`
-    });
-
-    // ⑤ Ngoài hợp
-    steps.push({
-        num:'⑤', cls:'orange',
-        title: `Ngoài Hợp — P(${nA}∩${nB})`,
-        formula: `P(${nA}∩${nB}) = 1 − P(${A}∪${B}) = 1 − ${sr(pAuB)} = <span class="hi-o">${sr(pNAnBnot)}</span>`,
-        note: `Phần không thuộc ${A} và cũng không thuộc ${B}.`
-    });
-
-    // ⑥ Hiệu xứng
-    steps.push({
-        num:'⑥', cls:'teal',
-        title: `Hiệu Xứng — P(${A}△${B})`,
-        formula: `P(${A}△${B}) = P(${A}∩${nB}) + P(${nA}∩${B})<br>
-                  = ${sr(pAnBnot)} + ${sr(pNAnB)} = <span style="color:#2dd4bf;font-weight:700">${sr(pAxB)}</span>`,
-        note: 'Hiệu xứng: những phần tử thuộc đúng một trong hai biến cố.'
-    });
-
-    // ⑦ Quan hệ
-    const relLines = [];
-    if (isXK) relLines.push(`✅ <b>Xung khắc</b>: P(${A}∩${B}) = 0 → ${A} và ${B} không thể cùng xảy ra.`);
-    else       relLines.push(`❌ Không xung khắc: P(${A}∩${B}) = ${sr(pAnB)} ≠ 0`);
-    if (isDL)  relLines.push(`✅ <b>Độc lập</b>: P(${A}∩${B}) = P(${A})·P(${B}) = ${sr(pA*pB)}`);
-    else       relLines.push(`❌ Không độc lập: P(${A}∩${B}) = ${sr(pAnB)} ≠ P(${A})·P(${B}) = ${sr(pA*pB)}`);
-
-    steps.push({
-        num:'⑦', cls:'yellow',
-        title: 'Kiểm Tra Quan Hệ',
-        formula: relLines.join('<br>'),
-        note: 'Hai biến cố vừa xung khắc vừa độc lập chỉ khi P(A)=0 hoặc P(B)=0.'
-    });
-
-    // Render
     container.innerHTML = steps.map((s, i) => `
         <div class="step-card" style="animation-delay:${i*0.05}s">
             <div class="step-num step-c-${s.cls}">${s.num}</div>
@@ -967,6 +1255,49 @@ function buildSteps(pA, pB, pAnB) {
             </div>
         </div>
     `).join('');
+
+    // Ghi chú nguồn tần số nếu đang dùng chế độ tần số
+    if(typeof _inputMode !== 'undefined' && _inputMode === 'freq') {
+        const nO  = parseFloat(document.getElementById('fn-nO')?.value)  || 0;
+        const nA  = parseFloat(document.getElementById('fn-nA')?.value)  || 0;
+        const nB  = parseFloat(document.getElementById('fn-nB')?.value)  || 0;
+        const nAB = parseFloat(document.getElementById('fn-nAB')?.value) || 0;
+        if(nO > 0) {
+            const note = document.createElement('div');
+            note.style.cssText = 'margin-top:10px;padding:8px 12px;background:rgba(255,229,0,.04);border:1px solid rgba(255,229,0,.14);border-radius:10px;font-size:.7rem;font-family:var(--font-mono);color:#64748b;';
+            note.innerHTML = `📊 Nguồn tần số: n(Ω)=${nO}, n(A)=${nA}, n(B)=${nB}, n(A∩B)=${nAB}`;
+            container.appendChild(note);
+        }
+    }
+}
+
+/* ============================================================
+   RESET FULL (cả 2 chế độ)
+============================================================ */
+function resetProbFull() {
+    // Reset xác suất
+    ['pA','pB','pAnB','pNotA','pNotB','pAuB'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.value = '';
+    });
+    document.querySelectorAll('.val').forEach(s => s.innerText = '—');
+    // Reset tần số
+    ['fn-nO','fn-nA','fn-nB','fn-nAB'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.value = '';
+    });
+    ['fn-show-pA','fn-show-pB','fn-show-pAB'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.textContent = id.includes('pA')?'P(A) = —':id.includes('pB')?'P(B) = —':'P(A∩B) = —';
+    });
+    const errEl = document.getElementById('fn-error');
+    if(errEl) errEl.textContent = '';
+    // Reset steps và venn
+    const container = document.getElementById('steps-container');
+    if(container) container.innerHTML = '<div class="step-placeholder">Nhập dữ liệu để xem lời giải chi tiết...</div>';
+    const svg = document.getElementById('venn-svg');
+    if(svg) { svg.innerHTML = `<rect x="4" y="4" width="552" height="272" rx="16" fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/><text x="20" y="28" fill="rgba(255,255,255,0.3)" font-size="14" font-family="monospace" font-weight="bold">&#937;</text><text x="280" y="150" fill="rgba(255,255,255,0.18)" font-size="13" font-family="monospace" text-anchor="middle" font-style="italic">Nha^p du lieu de xem bieu do...</text>`; }
+    const hint = document.getElementById('venn-hint');
+    if(hint) hint.textContent = 'Nhập dữ liệu để xem biểu đồ';
+    const status = document.getElementById('prob-status');
+    if(status) status.innerText = 'Sẵn sàng nhận dữ liệu. Nhập bất kỳ ô nào để tính.';
 }
 
 /* ============================================================
@@ -974,70 +1305,44 @@ function buildSteps(pA, pB, pAnB) {
 ============================================================ */
 function copySolution() {
     const { pA, pB, pAnB } = _lastVals;
-    const n      = getNames();
+    const n  = getNames();
     const A=n.A, B=n.B, nA=n.nA, nB=n.nB;
-    const sr     = v => (Math.round(v*10000)/10000).toString();
-    const pNotA  = 1-pA, pNotB=1-pB, pAuB=pA+pB-pAnB;
-    const pAnBnot= Math.max(0,pA-pAnB), pNAnB=Math.max(0,pB-pAnB);
+    const sr = v => (Math.round(v*10000)/10000).toString();
+    const pNotA=1-pA, pNotB=1-pB, pAuB=pA+pB-pAnB;
+    const pAnBnot=Math.max(0,pA-pAnB), pNAnB=Math.max(0,pB-pAnB);
     const pNAnBnot=Math.max(0,1-pAuB), pAxB=pAnBnot+pNAnB;
-    const isDL   = Math.abs(pAnB-pA*pB)<1e-6;
-    const isXK   = pAnB===0;
+    const isDL = Math.abs(pAnB-pA*pB)<1e-6;
+    const isXK = pAnB===0;
 
     const text = [
-        `=== LỜI GIẢI XÁC SUẤT ===`,
-        ``,
-        `Dữ liệu: P(${A}) = ${sr(pA)}, P(${B}) = ${sr(pB)}, P(${A}∩${B}) = ${sr(pAnB)}`,
-        ``,
+        `=== LỜI GIẢI XÁC SUẤT ===`,``,
+        `Dữ liệu: P(${A}) = ${sr(pA)}, P(${B}) = ${sr(pB)}, P(${A}∩${B}) = ${sr(pAnB)}`,``,
         `① Bù:`,
         `   P(${nA}) = 1 − ${sr(pA)} = ${sr(pNotA)}`,
-        `   P(${nB}) = 1 − ${sr(pB)} = ${sr(pNotB)}`,
-        ``,
+        `   P(${nB}) = 1 − ${sr(pB)} = ${sr(pNotB)}`,``,
         `② Hợp:`,
-        `   P(${A}∪${B}) = P(${A}) + P(${B}) − P(${A}∩${B}) = ${sr(pA)} + ${sr(pB)} − ${sr(pAnB)} = ${sr(pAuB)}`,
-        ``,
+        `   P(${A}∪${B}) = ${sr(pA)} + ${sr(pB)} − ${sr(pAnB)} = ${sr(pAuB)}`,``,
         `③ Phần riêng:`,
-        `   P(${A}∩${nB}) = P(${A}) − P(${A}∩${B}) = ${sr(pA)} − ${sr(pAnB)} = ${sr(pAnBnot)}`,
-        `   P(${nA}∩${B}) = P(${B}) − P(${A}∩${B}) = ${sr(pB)} − ${sr(pAnB)} = ${sr(pNAnB)}`,
-        ``,
+        `   P(${A}∩${nB}) = ${sr(pA)} − ${sr(pAnB)} = ${sr(pAnBnot)}`,
+        `   P(${nA}∩${B}) = ${sr(pB)} − ${sr(pAnB)} = ${sr(pNAnB)}`,``,
         `④ Ngoài hợp:`,
-        `   P(${nA}∩${nB}) = 1 − P(${A}∪${B}) = 1 − ${sr(pAuB)} = ${sr(pNAnBnot)}`,
-        ``,
+        `   P(${nA}∩${nB}) = 1 − ${sr(pAuB)} = ${sr(pNAnBnot)}`,``,
         `⑤ Hiệu xứng:`,
-        `   P(${A}△${B}) = ${sr(pAnBnot)} + ${sr(pNAnB)} = ${sr(pAxB)}`,
-        ``,
+        `   P(${A}△${B}) = ${sr(pAnBnot)} + ${sr(pNAnB)} = ${sr(pAxB)}`,``,
         `⑥ Quan hệ:`,
         `   Xung khắc: ${isXK ? 'Có ✓' : 'Không ✗'}`,
-        `   Độc lập:   ${isDL ? 'Có ✓' : 'Không ✗'}`,
-        ``,
+        `   Độc lập:   ${isDL ? 'Có ✓' : 'Không ✗'}`,``,
         `=== MathLab 12B2 — by Minh Nhựt ===`
     ].join('\n');
 
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copy-sol-btn');
+        if (!btn) return;
         btn.textContent = '✅ Đã Copy!';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
     });
 }
-
-/* ============================================================
-   HOOK INTO EXISTING INPUT HANDLER
-   Patch setVal to also trigger our update
-============================================================ */
-const _origSetVal = window.setVal;
-// We'll call updateVennAndSteps at the end of the prob calc block.
-// Inject via MutationObserver on res-pAuB value change.
-const _vennObs = new MutationObserver(() => {
-    const pA   = parseFloat(document.getElementById('pA')?.value)   || 0;
-    const pB   = parseFloat(document.getElementById('pB')?.value)   || 0;
-    const pAnB = parseFloat(document.getElementById('pAnB')?.value) || 0;
-    updateVennAndSteps(pA, pB, pAnB);
-});
-// DOM already loaded at this point (script is at end of body)
-(function() {
-    const target = document.getElementById('res-pAuB');
-    if (target) _vennObs.observe(target, { characterData:true, childList:true, subtree:true });
-})();
 </script>
 
 </body>
