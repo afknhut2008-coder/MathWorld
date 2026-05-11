@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathLab 12B2</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <style>
+        /* ===== GLOWING ORBS ===== */
+        .home-orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            filter: blur(90px);
+            animation: orbFloat var(--dur,14s) ease-in-out infinite alternate;
+        }
+        .home-orb-1 { width:420px;height:420px;background:radial-gradient(circle,rgba(0,242,255,0.11),transparent 70%);top:-100px;left:-100px;--dur:14s; }
+        .home-orb-2 { width:360px;height:360px;background:radial-gradient(circle,rgba(16,185,129,0.09),transparent 70%);bottom:-80px;right:-80px;--dur:19s; }
+        .home-orb-3 { width:240px;height:240px;background:radial-gradient(circle,rgba(191,95,255,0.07),transparent 70%);top:45%;left:55%;--dur:23s; }
+        @keyframes orbFloat {
+            0%   { transform:translate(0,0) scale(1); }
+            100% { transform:translate(35px,25px) scale(1.12); }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeDown  { from{opacity:0;transform:translateY(-22px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp    { from{opacity:0;transform:translateY(28px)}  to{opacity:1;transform:translateY(0)} }
+        @keyframes pulseDot  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(1.5)} }
+
+        /* ===== HERO ===== */
+        .hero-section { text-align:center; padding:16px 0 6px; }
+
+        .hero-badge {
+            display:inline-flex; align-items:center; gap:8px;
+            background:rgba(0,242,255,0.07); border:1px solid rgba(0,242,255,0.22);
+            border-radius:30px; padding:6px 18px;
+            font-size:0.7rem; font-family:var(--font-orb); color:var(--neon-blue); letter-spacing:2px;
+            margin-bottom:18px; animation:fadeDown .6s ease both;
+        }
+        .hero-badge-dot {
+            width:6px;height:6px;background:var(--neon-blue);border-radius:50%;
+            box-shadow:0 0 8px var(--neon-blue);animation:pulseDot 2s ease infinite;
+        }
+
+        .hero-title {
+            font-family:var(--font-orb); font-size:clamp(1.3rem,5vw,2.5rem); font-weight:900;
+            line-height:1.2; letter-spacing:3px; margin-bottom:12px;
+            animation:fadeDown .7s ease .1s both;
+        }
+        .hero-title .l1 { display:block; color:white; }
+        .hero-title .l2 { display:block; color:var(--neon-blue); text-shadow:0 0 30px rgba(0,242,255,.65),0 0 80px rgba(0,242,255,.2); }
+
+        .hero-sub {
+            color:var(--text-mid); font-size:.92rem; max-width:480px;
+            margin:0 auto 26px; line-height:1.7;
+            animation:fadeDown .8s ease .2s both;
+        }
+
+        /* ===== STATS ===== */
+        .stats-row {
+            display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+            margin:0 0 22px; animation:fadeUp .6s ease .65s both;
+        }
+        .stat-pill {
+            display:flex; align-items:center; gap:7px;
+            background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+            border-radius:30px; padding:6px 15px; font-size:.7rem;
+        }
+        .s-val { font-family:var(--font-orb); color:var(--neon-blue); font-size:.78rem; font-weight:700; }
+        .s-txt { color:#475569; font-family:var(--font-viet); }
+
+        /* ===== TOOL CARDS ===== */
+        .tools-grid {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+            gap:16px; margin:0 0 28px;
+        }
+        .tool-card {
+            display:flex; flex-direction:column; text-decoration:none; color:inherit;
+            background:var(--glass); border:1px solid var(--border);
+            border-radius:20px; padding:26px 22px; position:relative; overflow:hidden;
+            transition:all .35s cubic-bezier(.34,1.56,.64,1);
+            animation:fadeUp .6s ease both;
+        }
+        .tool-card:nth-child(1){animation-delay:.3s}
+        .tool-card:nth-child(2){animation-delay:.45s}
+        .tool-card:nth-child(3){animation-delay:.6s}
+
+        .tool-card::after {
+            content:''; position:absolute; inset:0;
+            background:var(--tc-glow,rgba(0,242,255,.04));
+            opacity:0; transition:opacity .35s;
+        }
+        .tool-card:hover {
+            transform:translateY(-7px) scale(1.025);
+            border-color:var(--tc-c,var(--neon-blue));
+            box-shadow:0 22px 60px rgba(0,0,0,.4), 0 0 35px var(--tc-sh,rgba(0,242,255,.15));
+        }
+        .tool-card:hover::after { opacity:1; }
+
+        .tool-card.blue  { --tc-c:var(--neon-blue); --tc-sh:rgba(0,242,255,.18);  --tc-glow:rgba(0,242,255,.035); }
+        .tool-card.teal  { --tc-c:var(--neon-blue); --tc-sh:rgba(0,242,255,.14);  --tc-glow:rgba(0,242,255,.025); }
+        .tool-card.green { --tc-c:var(--emerald);   --tc-sh:rgba(16,185,129,.18); --tc-glow:rgba(16,185,129,.03); }
+
+        .tool-arrow {
+            position:absolute; top:18px; right:18px; font-size:1.1rem;
+            opacity:0; transform:translateX(-10px); transition:all .3s;
+            color:var(--tc-c,var(--neon-blue));
+        }
+        .tool-card:hover .tool-arrow { opacity:1; transform:translateX(0); }
+
+        .tool-icon {
+            font-size:2.3rem; margin-bottom:14px; display:block;
+            transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .tool-card:hover .tool-icon { transform:scale(1.18) rotate(-6deg); }
+
+        .tool-tag {
+            font-family:var(--font-orb); font-size:.58rem; font-weight:700;
+            letter-spacing:2px; padding:3px 10px; border-radius:20px;
+            display:inline-block; margin-bottom:10px;
+        }
+        .tool-tag.blue  { color:var(--neon-blue); background:rgba(0,242,255,.1);  border:1px solid rgba(0,242,255,.22); }
+        .tool-tag.green { color:var(--emerald);   background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.22); }
+
+        .tool-name  { font-family:var(--font-orb); font-size:1rem; font-weight:700; color:white; margin-bottom:7px; }
+        .tool-desc  { font-size:.8rem; color:var(--text-mid); line-height:1.65; flex:1; }
+
+        .tool-formula {
+            font-family:var(--font-mono); font-size:1.2rem; margin-top:14px;
+            padding:9px; background:rgba(0,0,0,.22); border-radius:10px;
+            text-align:center; transition:background .3s;
+        }
+        .tool-card.blue  .tool-formula, .tool-card.teal .tool-formula  { color:var(--neon-blue); border:1px solid rgba(0,242,255,.13); }
+        .tool-card.green .tool-formula { color:var(--emerald);   border:1px solid rgba(16,185,129,.13); }
+        .tool-card:hover .tool-formula { background:rgba(0,0,0,.35); }
+
+        /* ===== NAME INPUT SECTION ===== */
+        .name-input-section { margin:0 0 20px; animation:fadeUp .7s ease .75s both; }
+
+        .ni-header {
+            display:flex; align-items:center; gap:12px; margin-bottom:16px;
+        }
+        .ni-title { font-family:var(--font-orb); font-size:.74rem; letter-spacing:2px; color:var(--neon-yellow); white-space:nowrap; }
+        .ni-line  { flex:1; height:1px; background:linear-gradient(90deg,rgba(255,229,0,.3),transparent); }
+        .ni-hint  { font-size:.63rem; color:#475569; font-family:var(--font-viet); white-space:nowrap; }
+
+        .ni-grid  { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+        @media(max-width:520px){ .ni-grid { grid-template-columns:1fr; } }
+
+        .ni-field {}
+
+        .ni-field-label {
+            font-size:.66rem; color:var(--text-mid); margin-bottom:5px;
+            padding-left:4px; font-family:var(--font-viet);
+        }
+        .ni-field-label em { font-style:italic; color:#475569; }
+
+        .ni-field-row {
+            display:flex; align-items:stretch;
+            background:rgba(0,0,0,.3); border:1px solid var(--nif-b,rgba(0,242,255,.2));
+            border-radius:13px; overflow:hidden; transition:all .3s ease;
+        }
+        .ni-field-row:focus-within {
+            border-color:var(--nif-c,var(--neon-blue));
+            box-shadow:0 0 18px var(--nif-gl,rgba(0,242,255,.13));
+            background:rgba(0,0,0,.42);
+        }
+
+        .ni-field.a-f  { --nif-c:var(--neon-blue); --nif-b:rgba(0,242,255,.22);    --nif-gl:rgba(0,242,255,.11); }
+        .ni-field.na-f { --nif-c:#64748b;          --nif-b:rgba(100,116,139,.28);  --nif-gl:rgba(100,116,139,.09); }
+        .ni-field.b-f  { --nif-c:var(--emerald);   --nif-b:rgba(16,185,129,.22);   --nif-gl:rgba(16,185,129,.11); }
+        .ni-field.nb-f { --nif-c:#4ade80;          --nif-b:rgba(74,222,128,.18);   --nif-gl:rgba(74,222,128,.09); }
+
+        .ni-prefix {
+            padding:10px 13px; font-family:var(--font-orb); font-size:.8rem; font-weight:700;
+            white-space:nowrap; border-right:1px solid var(--nif-b,rgba(0,242,255,.2));
+            background:rgba(0,0,0,.18); color:var(--nif-c,var(--neon-blue));
+            min-width:48px; text-align:center; transition:background .3s;
+        }
+        .ni-field-row:focus-within .ni-prefix { background:rgba(0,0,0,.35); }
+
+        .ni-field-row input[type="text"] {
+            background:transparent!important; border:none!important;
+            border-radius:0!important; flex:1; padding:10px 13px;
+            font-size:.83rem; color:white; outline:none; width:100%;
+            font-family:var(--font-viet);
+        }
+        .ni-field-row input[type="text"]::placeholder { color:rgba(148,163,184,.4); font-style:italic; }
+
+        /* Inline P() chip next to each field */
+        .ni-chip-row {
+            display:flex; align-items:center; gap:7px; margin-top:7px; flex-wrap:wrap;
+        }
+        .ni-chip {
+            display:inline-flex; align-items:center; gap:4px;
+            font-family:var(--font-mono); font-size:.72rem; font-weight:600;
+            padding:3px 10px; border-radius:20px;
+            border:1px solid var(--ch-b, rgba(0,242,255,.2));
+            background:var(--ch-bg, rgba(0,242,255,.06));
+            color:var(--ch-c, var(--neon-blue));
+            transition:all .25s ease;
+            opacity:0; transform:translateY(4px);
+            pointer-events:none;
+        }
+        .ni-chip.visible { opacity:1; transform:translateY(0); }
+        .ni-chip.blue    { --ch-c:var(--neon-blue); --ch-b:rgba(0,242,255,.25);   --ch-bg:rgba(0,242,255,.07); }
+        .ni-chip.gray    { --ch-c:#64748b;          --ch-b:rgba(100,116,139,.25); --ch-bg:rgba(100,116,139,.06); }
+        .ni-chip.green   { --ch-c:var(--emerald);   --ch-b:rgba(16,185,129,.25);  --ch-bg:rgba(16,185,129,.07); }
+        .ni-chip.lime    { --ch-c:#4ade80;           --ch-b:rgba(74,222,128,.22);  --ch-bg:rgba(74,222,128,.06); }
+
+        /* Combined formula row (bottom) */
+        .ni-formula-row {
+            margin-top:14px; padding:13px 16px;
+            background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.06);
+            border-radius:12px; display:flex; flex-wrap:wrap; gap:10px;
+            justify-content:center; align-items:center;
+            transition:all .3s; min-height:42px;
+        }
+        .ni-formula-chip {
+            display:inline-flex; align-items:center;
+            font-family:var(--font-mono); font-size:.73rem;
+            padding:3px 11px; border-radius:18px;
+            border:1px solid rgba(255,255,255,.07);
+            background:rgba(255,255,255,.03);
+            color:#475569; white-space:nowrap;
+            transition:all .3s;
+            opacity:0; transform:scale(.92);
+        }
+        .ni-formula-chip.visible { opacity:1; transform:scale(1); }
+        .ni-formula-chip.c-giao  { color:var(--neon-blue);  border-color:rgba(0,242,255,.18);   background:rgba(0,242,255,.05); }
+        .ni-formula-chip.c-hop   { color:var(--neon-green); border-color:rgba(0,255,157,.18);   background:rgba(0,255,157,.04); }
+        .ni-formula-chip.c-dk1   { color:var(--neon-yellow);border-color:rgba(255,229,0,.18);   background:rgba(255,229,0,.04); }
+        .ni-formula-chip.c-dk2   { color:var(--neon-purple);border-color:rgba(191,95,255,.18);  background:rgba(191,95,255,.04); }
+        .ni-formula-sep { color:#334155; font-size:.8rem; }
+
+        .pv-blue  { color:var(--neon-blue); }
+        .pv-green { color:var(--emerald); }
+        .pv-dim   { color:#475569; }
+        .pv-nb    { color:#4ade80; opacity:.75; }
+
+        /* ===== INLINE P() LABEL BELOW EACH FIELD ===== */
+        .ni-inline-label {
+            display:flex; align-items:center; gap:6px;
+            margin-top:7px; padding:5px 10px;
+            background:rgba(0,0,0,.18); border-radius:8px;
+            border:1px solid rgba(255,255,255,.05);
+            font-family:var(--font-mono); font-size:.72rem;
+            transition:all .25s;
+        }
+        .nil-math {
+            font-weight:700; font-size:.74rem; white-space:nowrap;
+        }
+        .nil-eq {
+            color:#334155; font-size:.8rem;
+        }
+        .nil-name {
+            font-family:var(--font-viet); font-size:.72rem;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+            font-style:italic; opacity:.85;
+            transition:all .2s;
+        }
+        /* colour helpers */
+        .c-blue  { color:var(--neon-blue); }
+        .c-gray  { color:#64748b; }
+        .c-green { color:var(--emerald); }
+        .c-lime  { color:#4ade80; }
+
+        /* ===== FOOTER ===== */
+        .home-footer {
+            margin-top:8px; padding-top:22px;
+            border-top:1px solid rgba(255,255,255,.06);
+            display:flex; flex-wrap:wrap; align-items:center;
+            justify-content:space-between; gap:14px;
+            animation:fadeUp .6s ease .9s both;
+        }
+        .footer-meta { font-size:.76rem; color:#475569; font-family:var(--font-viet); }
+        .footer-meta strong { color:#64748b; }
+
+        .fb-link {
+            display:inline-flex; align-items:center; gap:7px;
+            text-decoration:none; color:#60a5fa; font-size:.76rem;
+            font-family:var(--font-orb); font-weight:700; letter-spacing:1px;
+            padding:7px 18px; border:1px solid rgba(96,165,250,.22);
+            border-radius:25px; background:rgba(96,165,250,.06); transition:all .3s;
+        }
+        .fb-link:hover {
+            background:rgba(96,165,250,.14); border-color:rgba(96,165,250,.45);
+            box-shadow:0 0 18px rgba(96,165,250,.2); transform:translateY(-2px);
+        }
+
+        @media(max-width:600px){
+            .tools-grid { grid-template-columns:1fr; gap:12px; }
+            .hero-title  { letter-spacing:1.5px; }
+            .home-footer { flex-direction:column; align-items:center; text-align:center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Glowing orbs -->
+    <div class="home-orb home-orb-1"></div>
+    <div class="home-orb home-orb-2"></div>
+    <div class="home-orb home-orb-3"></div>
+
+    <!-- Floating math -->
+    <div class="math-bg">
+        <div class="math-item" style="top:12%;left:6%;   --dur:11s;--delay:0s">\(\sum\)</div>
+        <div class="math-item" style="top:28%;right:8%;  --dur:16s;--delay:2s">\(P(A|B)\)</div>
+        <div class="math-item" style="top:65%;left:12%;  --dur:13s;--delay:1s">\(\Omega\)</div>
+        <div class="math-item" style="top:55%;right:5%;  --dur:19s;--delay:3s">\(\int\)</div>
+        <div class="math-item" style="top:82%;left:38%;  --dur:15s;--delay:4s;font-size:1rem;opacity:.04;">\(P(B)=P(A)P(B|A)+P(A')P(B|A')\)</div>
+    </div>
+
+<nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo" style="text-decoration:none">
+            MATHLAB <span style="color:var(--neon-blue)">12B2</span>
+        </a>
+        
+        <ul>
+            <li><a href="probability-home.html">Xác suất</a></li>
+            <li><a href="probability.html">Thường</a></li>
+            <li><a href="conditional.html">Điều kiện</a></li>
+            <li><a href="statistics.html">Bảng Thống Kê</a></li>
+        </ul>
+    </div>
+</nav>
+    <div class="container">
+        <div class="glass-card" style="max-width:860px;margin:24px auto;">
+            <div class="author-tag">BY MINH NHỰT</div>
+
+            <!-- HERO -->
+            <div class="hero-section">
+                <div class="hero-badge">
+                    <div class="hero-badge-dot"></div>
+                    CNTT1 · TOÁN XÁC SUẤT
+                </div>
+                <h1 class="hero-title">
+                    <span class="l1">HỆ THỐNG GIẢI TOÁN</span>
+                    <span class="l2">XÁC SUẤT</span>
+                </h1>
+                <p class="hero-sub">Công cụ hỗ trợ học tập chuyên nghiệp — nhập số liệu, kết quả tự động tính tức thì.</p>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-row">
+                <div class="stat-pill"><span>🧮</span><span class="s-val">3</span><span class="s-txt">dạng bài toán</span></div>
+                <div class="stat-pill"><span>⚡</span><span class="s-val">Tức thì</span><span class="s-txt">kết quả real-time</span></div>
+                <div class="stat-pill"><span>📐</span><span class="s-val">Bayes</span><span class="s-txt">sơ đồ cây tự động</span></div>
+            </div>
+
+            <!-- TOOL CARDS -->
+            <div class="tools-grid">
+                <a href="probability.html" class="tool-card blue">
+                    <span class="tool-arrow">→</span>
+                    <span class="tool-icon">📊</span>
+                    <span class="tool-tag blue">CỔ ĐIỂN</span>
+                    <div class="tool-name">Xác Suất Thường</div>
+                    <div class="tool-desc">Tính P(A), P(B), hợp, giao, bù, hiệu xứng. Kiểm tra độc lập &amp; xung khắc. Hỗ trợ đặt tên biến cố tuỳ ý.</div>
+                    <div class="tool-formula">\(P(A \cup B)\)</div>
+                </a>
+                <a href="frequency.html" class="tool-card teal">
+                    <span class="tool-arrow">→</span>
+                    <span class="tool-icon">🔢</span>
+                    <span class="tool-tag blue">TẦN SỐ</span>
+                    <div class="tool-name">Tính Theo n(A)</div>
+                    <div class="tool-desc">Nhập số phần tử n(Ω), n(A), n(B), n(A∩B) — xác suất được tính tự động từ tần số.</div>
+                    <div class="tool-formula">\(\frac{n(A)}{n(\Omega)}\)</div>
+                </a>
+                <a href="conditional.html" class="tool-card green">
+                    <span class="tool-arrow">→</span>
+                    <span class="tool-icon">🌿</span>
+                    <span class="tool-tag green">ĐIỀU KIỆN</span>
+                    <div class="tool-name">Sơ Đồ Cây &amp; Bayes</div>
+                    <div class="tool-desc">Nhập P(A), P(B|A), ... để vẽ sơ đồ cây và giải ngược theo định lý Bayes một cách trực quan.</div>
+                    <div class="tool-formula">\(P(A|B) = \frac{P(A \cap B)}{P(B)}\)</div>
+                </a>
+            </div>
+
+          
+
+            <!-- FOOTER -->
+            <div class="home-footer">
+                <div class="footer-meta">
+                    <strong>Dự án CNTT1</strong> · Trang web của Minh Nhựt · Lớp 12B2
+                </div>
+                <a href="https://www.facebook.com/share/18PJjx59gY/" target="_blank" class="fb-link">
+                    🔗 KẾT NỐI FACEBOOK
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function updatePreview() {
+        const nA  = document.getElementById('name-A').value.trim()    || '';
+        const nB  = document.getElementById('name-B').value.trim()    || '';
+        const nNA = document.getElementById('name-notA').value.trim() || '';
+        const nNB = document.getElementById('name-notB').value.trim() || '';
+
+        // Fallback display names
+        const dA  = nA  || 'A';
+        const dB  = nB  || 'B';
+        const dNA = nNA || (nA ? 'không ' + nA : "A'");
+        const dNB = nNB || (nB ? 'không ' + nB : "B'");
+
+        // Update inline labels
+        const nilA  = document.getElementById('nil-A');
+        const nilNA = document.getElementById('nil-NA');
+        const nilB  = document.getElementById('nil-B');
+        const nilNB = document.getElementById('nil-NB');
+
+        nilA.textContent  = nA  ? '"' + nA  + '"' : 'xác suất A xảy ra';
+        nilNA.textContent = nNA ? '"' + nNA + '"' : (nA ? '"không ' + nA + '"' : 'xác suất A không xảy ra');
+        nilB.textContent  = nB  ? '"' + nB  + '"' : 'xác suất B xảy ra';
+        nilNB.textContent = nNB ? '"' + nNB + '"' : (nB ? '"không ' + nB + '"' : 'xác suất B không xảy ra');
+
+        // Bottom preview row
+        const prev = document.getElementById('ni-preview');
+        const hasCustom = nA || nB;
+        if (!hasCustom) {
+            prev.innerHTML = '<span class="pv-dim">Nhập tên biến cố để xem trước nhãn...</span>';
+            return;
+        }
+        prev.innerHTML =
+            `<span class="pv-blue">P(${dA})</span>`
+            + ` <span class="pv-dim">·</span> `
+            + `<span style="color:#475569">P(${dNA})</span>`
+            + `&emsp;<span class="pv-dim">|</span>&emsp;`
+            + `<span class="pv-green">P(${dB})</span>`
+            + ` <span class="pv-dim">·</span> `
+            + `<span style="color:#4ade80;opacity:.75">P(${dNB})</span>`
+            + `<br>`
+            + `<span class="pv-dim">P(${dA} ∩ ${dB}) &nbsp;·&nbsp; P(${dA} ∪ ${dB}) &nbsp;·&nbsp; P(${dB}|${dA}) &nbsp;·&nbsp; P(${dA}|${dB})</span>`;
+    }
+
+    // Restore saved names & attach listeners
+    ['name-A','name-B','name-notA','name-notB'].forEach(id => {
+        const el = document.getElementById(id);
+        const saved = sessionStorage.getItem('ml_' + id);
+        if (saved) el.value = saved;
+        el.addEventListener('input', () => {
+            sessionStorage.setItem('ml_' + id, el.value);
+            updatePreview();
+        });
+    });
+    updatePreview();
+    </script>
+</body>
+</html>

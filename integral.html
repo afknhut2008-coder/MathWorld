@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tích Phân - MathLab 12B2</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+    <style>
+        .mode-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+        .mode-tab {
+            padding: 8px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: var(--font-orb);
+            font-size: 0.7rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-mid);
+            transition: 0.3s;
+        }
+        .mode-tab.active {
+            background: var(--neon-blue);
+            color: #000;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0,242,255,0.3);
+        }
+        .mode-tab:hover:not(.active) {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+        .input-group {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            font-family: var(--font-orb);
+            font-size: 0.75rem;
+            color: var(--neon-blue);
+            display: block;
+            margin-bottom: 8px;
+        }
+        .input-group textarea, .input-group input {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: white;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+        .input-group textarea:focus, .input-group input:focus {
+            border-color: var(--neon-blue);
+            outline: none;
+            box-shadow: 0 0 15px rgba(0,242,255,0.15);
+        }
+        /* ===== CASIO-STYLE MATH KEYBOARD ===== */
+        .math-keyboard {
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 12px;
+            border: 1px solid rgba(0,242,255,0.2);
+        }
+        .keyboard-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .math-key {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(0,242,255,0.3);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--neon-blue);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-width: 55px;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .math-key:hover {
+            background: rgba(0,242,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,242,255,0.2);
+        }
+        .math-key.special {
+            background: rgba(16,185,129,0.1);
+            border-color: rgba(16,185,129,0.35);
+            color: var(--emerald);
+        }
+        .math-key.wide {
+            min-width: 70px;
+        }
+        .math-key.casio-frac {
+            background: rgba(255,229,0,0.12);
+            border-color: rgba(255,229,0,0.35);
+            color: var(--neon-yellow);
+            font-size: 1.1rem;
+        }
+        .math-key .small-symbol {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+        /* Modal nhập phân số CASIO style */
+        .fraction-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .fraction-modal-content {
+            background: linear-gradient(145deg, rgba(15,25,45,0.98), rgba(5,15,35,0.98));
+            border: 2px solid var(--neon-blue);
+            border-radius: 28px;
+            padding: 30px;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(0,242,255,0.25);
+        }
+        .fraction-modal-content h3 {
+            color: var(--neon-yellow);
+            font-family: var(--font-orb);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        .fraction-display {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .fraction-visual {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            color: var(--neon-green);
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .fraction-visual .numerator {
+            border-bottom: 3px solid var(--neon-blue);
+            padding: 0 20px 8px;
+            font-size: 1.3rem;
+        }
+        .fraction-visual .denominator {
+            padding-top: 8px;
+            font-size: 1.3rem;
+        }
+        .fraction-input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .fraction-input-group label {
+            color: var(--neon-blue);
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 8px;
+            font-family: var(--font-orb);
+        }
+        .fraction-input-group input {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            color: white;
+            text-align: center;
+            font-size: 1rem;
+            font-family: var(--font-mono);
+        }
+        .fraction-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .fraction-confirm {
+            background: var(--neon-blue);
+            color: #000;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-family: var(--font-orb);
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .fraction-confirm:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0,242,255,0.5);
+        }
+        .fraction-cancel {
+            background: rgba(255,45,120,0.15);
+            color: var(--neon-pink);
+            border: 1px solid var(--neon-pink);
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-family: var(--font-orb);
+            cursor: pointer;
+        }
+        .coord-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 12px;
+        }
+        .sub-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .sub-tab {
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-mid);
+            transition: 0.2s;
+        }
+        .sub-tab.active {
+            background: rgba(0,242,255,0.2);
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+        }
+        .result-box {
+            background: rgba(0,0,0,0.25);
+            border-radius: 14px;
+            padding: 18px;
+            text-align: center;
+            margin-top: 15px;
+            border-left: 3px solid var(--emerald);
+        }
+        .result-value {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            word-break: break-word;
+            line-height: 1.5;
+        }
+        .result-label {
+            color: var(--neon-yellow);
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .step-solution {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(0,0,0,.18);
+            border: 1px solid rgba(16,185,129,.16);
+            border-radius: 18px;
+        }
+        .step-card {
+            display: flex;
+            gap: 12px;
+            background: rgba(255,255,255,.025);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .step-num {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            background: rgba(0,242,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-orb);
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: var(--neon-blue);
+        }
+        .step-body { flex: 1; }
+        .step-title {
+            font-family: var(--font-orb);
+            font-size: 0.7rem;
+            color: var(--neon-yellow);
+            margin-bottom: 5px;
+        }
+        .step-formula {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.6;
+        }
+        .hi-b { color: var(--neon-blue); font-weight: 700; }
+        .hi-g { color: var(--emerald); font-weight: 700; }
+        .copy-sol-btn {
+            background: rgba(16,185,129,.1);
+            border: 1px solid rgba(16,185,129,.3);
+            color: var(--emerald);
+            font-size: 0.68rem;
+            font-family: var(--font-orb);
+            padding: 5px 13px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .copy-sol-btn:hover {
+            background: rgba(16,185,129,.22);
+            box-shadow: 0 0 14px rgba(16,185,129,.2);
+        }
+        @media (max-width: 600px) {
+            .math-key { padding: 6px 8px; font-size: 0.8rem; min-width: 42px; }
+            .keyboard-row { gap: 5px; }
+            .fraction-modal-content { width: 90%; margin: 20px; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+    <div class="nav-container">
+        <a href="index.html" class="logo">
+            MATHLAB <span>12B2</span>
+        </a>
+        <ul>
+            <li><a href="index.html">Trang Chủ</a></li>
+            <li><a href="probability.html">Xác suất</a></li>
+            <li><a href="integral.html" class="active">Tích phân</a></li>
+            <li><a href="geometry.html">Oxyz</a></li>
+        </ul>
+    </div>
+</nav>
+
+    <div class="container">
+        <div class="glass-card">
+            <div class="author-tag">BY MINH NHỰT</div>
+            <h2 class="title-neon">∫ TÍCH PHÂN & ỨNG DỤNG</h2>
+            <p class="title-sub">Đạo hàm · Nguyên hàm · Tích phân · Diện tích · Thể tích</p>
+
+            <!-- Main tabs -->
+            <div class="mode-tabs">
+                <div class="mode-tab active" onclick="setMode('derivative')">📈 ĐẠO HÀM</div>
+                <div class="mode-tab" onclick="setMode('integral')">📐 NGUYÊN HÀM</div>
+                <div class="mode-tab" onclick="setMode('definite')">🎯 TÍCH PHÂN XÁC ĐỊNH</div>
+                <div class="mode-tab" onclick="setMode('application')">📊 ỨNG DỤNG</div>
+            </div>
+
+            <!-- Modal nhập phân số CASIO style -->
+            <div id="fractionModal" class="fraction-modal">
+                <div class="fraction-modal-content">
+                    <h3>📐 NHẬP PHÂN SỐ</h3>
+                    <div class="fraction-display">
+                        <div class="fraction-visual">
+                            <span class="numerator" id="previewNumerator">tử số</span>
+                            <span class="denominator" id="previewDenominator">mẫu số</span>
+                        </div>
+                    </div>
+                    <div class="fraction-input-group">
+                        <label>🔹 TỬ SỐ</label>
+                        <input type="text" id="fractionNumerator" placeholder="VD: x^2+1, sin(x), 2x+3" value="x^2">
+                    </div>
+                    <div class="fraction-input-group">
+                        <label>🔹 MẪU SỐ</label>
+                        <input type="text" id="fractionDenominator" placeholder="VD: x+1, cos(x), 2" value="x+1">
+                    </div>
+                    <div class="fraction-buttons">
+                        <button class="fraction-confirm" onclick="insertFraction()">✅ CHÈN</button>
+                        <button class="fraction-cancel" onclick="closeFractionModal()">❌ HỦY</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 1. ĐẠO HÀM ========== -->
+            <div id="derivative-mode">
+                <div class="input-group">
+                    <label>📌 Hàm số f(x) =</label>
+                    <textarea id="deriv-func" placeholder="Ví dụ: x^2, sin(x), e^x, (x^2+1)/(x+1)" rows="2">x^2</textarea>
+                    
+                    <!-- Bàn phím CASIO -->
+                    <div class="math-keyboard">
+                        <div class="keyboard-row">
+                            <div class="math-key" onclick="insertMath('deriv-func', 'x')">x</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '^')">^</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '2')">²</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '3')">³</div>
+                            <div class="math-key" onclick="wrapParentheses('deriv-func')">( )</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '+')">+</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '-')">−</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '*')">×</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '/')">÷</div>
+                        </div>
+                        <div class="keyboard-row">
+                            <div class="math-key casio-frac" onclick="openFractionModal('deriv-func')">
+                                <span>▯</span><span class="small-symbol">/</span><span>▯</span>
+                            </div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'sin(x)')">sin</div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'cos(x)')">cos</div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'tan(x)')">tan</div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'exp(x)')">eˣ</div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'log(x)')">ln</div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'sqrt(x)')">√▯</div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'abs(x)')">|x|</div>
+                            <div class="math-key special" onclick="insertMath('deriv-func', 'pi')">π</div>
+                        </div>
+                        <div class="keyboard-row">
+                            <div class="math-key" onclick="insertMath('deriv-func', 'x^2')">x²</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', 'x^3')">x³</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', '1/x')">1/x</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', 'e^x')">eˣ</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', 'sin(x)')">sin▯</div>
+                            <div class="math-key" onclick="insertMath('deriv-func', 'cos(x)')">cos▯</div>
+                            <div class="math-key wide" onclick="clearInput('deriv-func')">🗑️ Xóa</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="calculateDerivative()" style="width:100%; margin-top:15px;">📈 TÍNH ĐẠO HÀM f'(x)</button>
+                </div>
+                <div id="deriv-result" class="result-box" style="display:none;">
+                    <div class="result-label">🔹 ĐẠO HÀM f'(x) =</div>
+                    <div class="result-value" id="deriv-value"></div>
+                </div>
+                <div id="deriv-steps" class="step-solution" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <span class="sec-label green">📝 Lời Giải Chi Tiết</span>
+                        <button class="copy-sol-btn" onclick="copyDerivativeSolution()">📋 Copy</button>
+                    </div>
+                    <div id="deriv-steps-container"></div>
+                </div>
+            </div>
+
+            <!-- ========== 2. NGUYÊN HÀM ========== -->
+            <div id="integral-mode" style="display:none;">
+                <div class="input-group">
+                    <label>📌 Hàm số f(x) =</label>
+                    <textarea id="antideriv-func" placeholder="Ví dụ: x^2, sin(x), e^x, 1/x, (x^2+1)/(x+1)" rows="2">x^2</textarea>
+                    
+                    <div class="math-keyboard">
+                        <div class="keyboard-row">
+                            <div class="math-key" onclick="insertMath('antideriv-func', 'x')">x</div>
+                            <div class="math-key" onclick="insertMath('antideriv-func', '^')">^</div>
+                            <div class="math-key" onclick="insertMath('antideriv-func', '2')">²</div>
+                            <div class="math-key" onclick="insertMath('antideriv-func', '3')">³</div>
+                            <div class="math-key" onclick="wrapParentheses('antideriv-func')">( )</div>
+                            <div class="math-key" onclick="insertMath('antideriv-func', '+')">+</div>
+                            <div class="math-key" onclick="insertMath('antideriv-func', '-')">−</div>
+                            <div class="math-key" onclick="insertMath('antideriv-func', '*')">×</div>
+                            <div class="math-key" onclick="insertMath('antideriv-func', '/')">÷</div>
+                        </div>
+                        <div class="keyboard-row">
+                            <div class="math-key casio-frac" onclick="openFractionModal('antideriv-func')">▯/▯</div>
+                            <div class="math-key special" onclick="insertMath('antideriv-func', 'sin(x)')">sin</div>
+                            <div class="math-key special" onclick="insertMath('antideriv-func', 'cos(x)')">cos</div>
+                            <div class="math-key special" onclick="insertMath('antideriv-func', 'tan(x)')">tan</div>
+                            <div class="math-key special" onclick="insertMath('antideriv-func', 'exp(x)')">eˣ</div>
+                            <div class="math-key special" onclick="insertMath('antideriv-func', 'log(x)')">ln</div>
+                            <div class="math-key special" onclick="insertMath('antideriv-func', 'sqrt(x)')">√▯</div>
+                            <div class="math-key special" onclick="insertMath('antideriv-func', 'pi')">π</div>
+                            <div class="math-key wide" onclick="clearInput('antideriv-func')">🗑️ Xóa</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="calculateAntiderivative()" style="width:100%; margin-top:15px;">∫ TÌM NGUYÊN HÀM F(x) + C</button>
+                </div>
+                <div id="anti-result" class="result-box" style="display:none;">
+                    <div class="result-label">🔹 NGUYÊN HÀM ∫ f(x) dx =</div>
+                    <div class="result-value" id="anti-value"></div>
+                </div>
+                <div id="anti-steps" class="step-solution" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <span class="sec-label green">📝 Lời Giải Chi Tiết</span>
+                        <button class="copy-sol-btn" onclick="copyAntiderivativeSolution()">📋 Copy</button>
+                    </div>
+                    <div id="anti-steps-container"></div>
+                </div>
+            </div>
+
+            <!-- ========== 3. TÍCH PHÂN XÁC ĐỊNH ========== -->
+            <div id="definite-mode" style="display:none;">
+                <div class="input-group">
+                    <label>📌 Hàm số f(x) =</label>
+                    <textarea id="def-func" placeholder="Ví dụ: x^2, sin(x), e^x, (x^2+1)/(x+1)" rows="2">x^2</textarea>
+                    
+                    <div class="math-keyboard">
+                        <div class="keyboard-row">
+                            <div class="math-key" onclick="insertMath('def-func', 'x')">x</div>
+                            <div class="math-key" onclick="insertMath('def-func', '^')">^</div>
+                            <div class="math-key" onclick="insertMath('def-func', '2')">²</div>
+                            <div class="math-key" onclick="insertMath('def-func', '3')">³</div>
+                            <div class="math-key" onclick="wrapParentheses('def-func')">( )</div>
+                            <div class="math-key" onclick="insertMath('def-func', '+')">+</div>
+                            <div class="math-key" onclick="insertMath('def-func', '-')">−</div>
+                            <div class="math-key" onclick="insertMath('def-func', '*')">×</div>
+                            <div class="math-key" onclick="insertMath('def-func', '/')">÷</div>
+                        </div>
+                        <div class="keyboard-row">
+                            <div class="math-key casio-frac" onclick="openFractionModal('def-func')">▯/▯</div>
+                            <div class="math-key special" onclick="insertMath('def-func', 'sin(x)')">sin</div>
+                            <div class="math-key special" onclick="insertMath('def-func', 'cos(x)')">cos</div>
+                            <div class="math-key special" onclick="insertMath('def-func', 'tan(x)')">tan</div>
+                            <div class="math-key special" onclick="insertMath('def-func', 'exp(x)')">eˣ</div>
+                            <div class="math-key special" onclick="insertMath('def-func', 'log(x)')">ln</div>
+                            <div class="math-key special" onclick="insertMath('def-func', 'sqrt(x)')">√▯</div>
+                            <div class="math-key special" onclick="insertMath('def-func', 'pi')">π</div>
+                            <div class="math-key wide" onclick="clearInput('def-func')">🗑️ Xóa</div>
+                        </div>
+                    </div>
+                    
+                    <div class="coord-row">
+                        <div><label>a (cận dưới)</label><input type="number" id="def-a" value="0" step="0.1"></div>
+                        <div><label>b (cận trên)</label><input type="number" id="def-b" value="2" step="0.1"></div>
+                    </div>
+                    <button class="btn" onclick="calculateDefiniteIntegral()" style="width:100%; margin-top:15px;">∫ TÍNH TÍCH PHÂN XÁC ĐỊNH</button>
+                </div>
+                <div id="def-result" class="result-box" style="display:none;">
+                    <div class="result-label">🔹 KẾT QUẢ I = ∫ₐᵇ f(x) dx =</div>
+                    <div class="result-value" id="def-value"></div>
+                </div>
+                <div id="def-steps" class="step-solution" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <span class="sec-label green">📝 Lời Giải Chi Tiết</span>
+                        <button class="copy-sol-btn" onclick="copyDefiniteSolution()">📋 Copy</button>
+                    </div>
+                    <div id="def-steps-container"></div>
+                </div>
+            </div>
+
+            <!-- ========== 4. ỨNG DỤNG ========== -->
+            <div id="application-mode" style="display:none;">
+                <div class="sub-tabs">
+                    <div class="sub-tab active" onclick="setAppMode('area')">📏 DIỆN TÍCH HÌNH PHẲNG</div>
+                    <div class="sub-tab" onclick="setAppMode('volume')">🧊 THỂ TÍCH TRÒN XOAY</div>
+                </div>
+
+                <div id="area-submode">
+                    <div class="input-group">
+                        <label>📌 Hàm số f(x) (phía trên) =</label>
+                        <textarea id="area-f" rows="2">x^2</textarea>
+                        <label style="margin-top:12px">📌 Hàm số g(x) (phía dưới) =</label>
+                        <textarea id="area-g" rows="2">0</textarea>
+                        <div class="coord-row">
+                            <div><label>a (cận dưới)</label><input type="number" id="area-a" value="0" step="0.1"></div>
+                            <div><label>b (cận trên)</label><input type="number" id="area-b" value="2" step="0.1"></div>
+                        </div>
+                        <button class="btn" onclick="calculateArea()" style="width:100%; margin-top:15px;">📏 TÍNH DIỆN TÍCH</button>
+                    </div>
+                    <div id="area-result" class="result-box" style="display:none;">
+                        <div class="result-label">🔹 DIỆN TÍCH S =</div>
+                        <div class="result-value" id="area-value"></div>
+                    </div>
+                </div>
+
+                <div id="volume-submode" style="display:none;">
+                    <div class="sub-tabs" style="margin-bottom:15px;">
+                        <div class="sub-tab active" onclick="setVolumeAxis('ox')">🟢 QUAY QUANH Ox</div>
+                        <div class="sub-tab" onclick="setVolumeAxis('oy')">🔵 QUAY QUANH Oy</div>
+                    </div>
+                    <div class="input-group">
+                        <label>📌 Hàm số f(x) =</label>
+                        <textarea id="volume-f" rows="2">x^2</textarea>
+                        <div class="coord-row">
+                            <div><label>a (cận dưới)</label><input type="number" id="volume-a" value="0" step="0.1"></div>
+                            <div><label>b (cận trên)</label><input type="number" id="volume-b" value="2" step="0.1"></div>
+                        </div>
+                        <button class="btn" onclick="calculateVolume()" style="width:100%; margin-top:15px;">🧊 TÍNH THỂ TÍCH</button>
+                    </div>
+                    <div id="volume-result" class="result-box" style="display:none;">
+                        <div class="result-label">🔹 THỂ TÍCH V =</div>
+                        <div class="result-value" id="volume-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHEAT SHEET SIDEBAR -->
+    <button class="cs-toggle-btn" onclick="toggleCS()">
+        <span class="cs-icon">📐</span>CÔNG THỨC
+    </button>
+    <div class="cs-overlay" id="cs-overlay" onclick="toggleCS()"></div>
+    <div class="cs-sidebar" id="cs-sidebar">
+        <div class="cs-header">
+            <h3>📐 CHEAT SHEET - TÍCH PHÂN</h3>
+            <button class="cs-close" onclick="toggleCS()">✕</button>
+        </div>
+        <div class="cs-section" id="cs-deriv">
+            <div class="cs-section-header c-blue" onclick="toggleSection('cs-deriv')">
+                🔵 CÔNG THỨC ĐẠO HÀM <span class="cs-chevron">▼</span>
+            </div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\((x^n)' = n \cdot x^{n-1}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\((\sin x)' = \cos x\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\((\cos x)' = -\sin x\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\((\tan x)' = \frac{1}{\cos^2 x}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\((e^x)' = e^x\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\((\ln x)' = \frac{1}{x}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\((u \pm v)' = u' \pm v'\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\((uv)' = u'v + uv'\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\left(\frac{u}{v}\right)' = \frac{u'v - uv'}{v^2}\)</div></div>
+            </div>
+        </div>
+        <div class="cs-section" id="cs-antideriv">
+            <div class="cs-section-header c-green" onclick="toggleSection('cs-antideriv')">
+                🟢 NGUYÊN HÀM <span class="cs-chevron">▼</span>
+            </div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(\int x^n dx = \frac{x^{n+1}}{n+1} + C\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\int \frac{1}{x} dx = \ln|x| + C\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\int \sin x dx = -\cos x + C\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\int \cos x dx = \sin x + C\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\int e^x dx = e^x + C\)</div></div>
+            </div>
+        </div>
+        <div class="cs-section" id="cs-app">
+            <div class="cs-section-header c-yellow" onclick="toggleSection('cs-app')">
+                🟡 TÍCH PHÂN & ỨNG DỤNG <span class="cs-chevron">▼</span>
+            </div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(\int_a^b f(x)dx = F(b) - F(a)\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(S = \int_a^b |f(x) - g(x)| dx\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(V_{Ox} = \pi \int_a^b [f(x)]^2 dx\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(V_{Oy} = \pi \int_{y_1}^{y_2} [x(y)]^2 dy\)</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentMode = 'derivative';
+        let currentAppMode = 'area';
+        let currentVolumeAxis = 'ox';
+        let currentTargetTextarea = null;
+
+        // Chèn ký tự vào textarea
+        function insertMath(textareaId, char) {
+            const textarea = document.getElementById(textareaId);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            let insertText = char;
+            if (char === 'pi') insertText = 'pi';
+            else if (char === 'e^x') insertText = 'exp(x)';
+            else if (char === '√▯') insertText = 'sqrt(x)';
+            else if (char === 'sin▯') insertText = 'sin(x)';
+            else if (char === 'cos▯') insertText = 'cos(x)';
+            const newValue = textarea.value.substring(0, start) + insertText + textarea.value.substring(end);
+            textarea.value = newValue;
+            textarea.focus();
+            textarea.setSelectionRange(start + insertText.length, start + insertText.length);
+        }
+
+        function wrapParentheses(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selected = textarea.value.substring(start, end);
+            const wrapText = selected ? `(${selected})` : '()';
+            const newValue = textarea.value.substring(0, start) + wrapText + textarea.value.substring(end);
+            textarea.value = newValue;
+            textarea.focus();
+            textarea.setSelectionRange(start + 1, start + wrapText.length - 1);
+        }
+
+        function clearInput(textareaId) {
+            document.getElementById(textareaId).value = '';
+        }
+
+        // Modal phân số
+        function openFractionModal(targetId) {
+            currentTargetTextarea = targetId;
+            document.getElementById('fractionModal').style.display = 'flex';
+            updateFractionPreview();
+        }
+
+        function closeFractionModal() {
+            document.getElementById('fractionModal').style.display = 'none';
+            currentTargetTextarea = null;
+        }
+
+        function updateFractionPreview() {
+            const numerator = document.getElementById('fractionNumerator').value || '?';
+            const denominator = document.getElementById('fractionDenominator').value || '?';
+            document.getElementById('previewNumerator').innerHTML = numerator;
+            document.getElementById('previewDenominator').innerHTML = denominator;
+        }
+
+        function insertFraction() {
+            if (!currentTargetTextarea) return;
+            const numerator = document.getElementById('fractionNumerator').value;
+            const denominator = document.getElementById('fractionDenominator').value;
+            const fractionStr = `(${numerator})/(${denominator})`;
+            const textarea = document.getElementById(currentTargetTextarea);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const newValue = textarea.value.substring(0, start) + fractionStr + textarea.value.substring(end);
+            textarea.value = newValue;
+            textarea.focus();
+            textarea.setSelectionRange(start + fractionStr.length, start + fractionStr.length);
+            closeFractionModal();
+        }
+
+        document.getElementById('fractionNumerator').addEventListener('input', updateFractionPreview);
+        document.getElementById('fractionDenominator').addEventListener('input', updateFractionPreview);
+
+        // Các hàm chính
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('derivative-mode').style.display = mode === 'derivative' ? 'block' : 'none';
+            document.getElementById('integral-mode').style.display = mode === 'integral' ? 'block' : 'none';
+            document.getElementById('definite-mode').style.display = mode === 'definite' ? 'block' : 'none';
+            document.getElementById('application-mode').style.display = mode === 'application' ? 'block' : 'none';
+        }
+
+        function setAppMode(mode) {
+            currentAppMode = mode;
+            const tabs = document.querySelectorAll('#application-mode .sub-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            if (mode === 'area') {
+                document.getElementById('area-submode').style.display = 'block';
+                document.getElementById('volume-submode').style.display = 'none';
+                tabs[0].classList.add('active');
+            } else {
+                document.getElementById('area-submode').style.display = 'none';
+                document.getElementById('volume-submode').style.display = 'block';
+                tabs[1].classList.add('active');
+            }
+        }
+
+        function setVolumeAxis(axis) {
+            currentVolumeAxis = axis;
+            const tabs = document.querySelectorAll('#volume-submode .sub-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            if (axis === 'ox') tabs[0].classList.add('active');
+            else tabs[1].classList.add('active');
+        }
+
+        function parseFunction(expr) {
+            try {
+                const compiled = math.compile(expr);
+                return (x) => compiled.evaluate({ x: x });
+            } catch(e) { return null; }
+        }
+
+        function numericalIntegral(f, a, b, n = 1000) {
+            const h = (b - a) / n;
+            let sum = 0;
+            for (let i = 0; i <= n; i++) {
+                const x = a + i * h;
+                const y = f(x);
+                if (isNaN(y)) return NaN;
+                if (i === 0 || i === n) sum += y;
+                else if (i % 2 === 0) sum += 2 * y;
+                else sum += 4 * y;
+            }
+            return (h / 3) * sum;
+        }
+
+        function calculateDerivative() {
+            const expr = document.getElementById('deriv-func').value;
+            try {
+                const f = math.parse(expr);
+                const derivative = math.derivative(f, 'x');
+                let derivStr = derivative.toString().replace(/\*/g, '·').replace(/pow\(([^,]+),(\d+)\)/g, '$1^$2');
+                document.getElementById('deriv-value').innerHTML = `\\( f'(x) = ${derivStr} \\)`;
+                document.getElementById('deriv-result').style.display = 'block';
+                document.getElementById('deriv-steps').style.display = 'block';
+                MathJax.typesetPromise();
+                document.getElementById('deriv-steps-container').innerHTML = `
+                    <div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-title">Hàm số</div><div class="step-formula">f(x) = ${expr}</div></div></div>
+                    <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Đạo hàm</div><div class="step-formula">f'(x) = ${derivStr}</div></div></div>
+                    <div class="step-card"><div class="step-num">3</div><div class="step-body"><div class="step-title">Kết quả</div><div class="step-formula"><span class="hi-g">f'(x) = ${derivStr}</span></div></div></div>
+                `;
+            } catch(e) { alert('❌ Lỗi: ' + e.message); }
+        }
+
+        function copyDerivativeSolution() {
+            const steps = document.getElementById('deriv-steps-container').innerText;
+            navigator.clipboard.writeText("=== LỜI GIẢI ĐẠO HÀM ===\n" + steps);
+            const btn = document.querySelector('#deriv-steps .copy-sol-btn');
+            btn.textContent = '✅ Đã Copy!';
+            setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        }
+
+        function getBasicAntiderivative(expr) {
+            const rules = {
+                'x^0': 'x', '1': 'x', 'x': 'x²/2', 'x^1': 'x²/2',
+                'sin(x)': '-cos(x)', 'cos(x)': 'sin(x)', 'exp(x)': 'exp(x)',
+                '1/x': 'ln|x|', 'e^x': 'e^x'
+            };
+            for (let [key, val] of Object.entries(rules)) if (expr === key) return val;
+            if (expr.includes('^')) {
+                let match = expr.match(/x\^(\d+)/);
+                if (match) return `x^${parseInt(match[1])+1}/${parseInt(match[1])+1}`;
+            }
+            return expr + 'x';
+        }
+
+        function calculateAntiderivative() {
+            const expr = document.getElementById('antideriv-func').value;
+            let result = getBasicAntiderivative(expr);
+            document.getElementById('anti-value').innerHTML = `\\( \\int ${expr} dx = ${result} + C \\)`;
+            document.getElementById('anti-result').style.display = 'block';
+            document.getElementById('anti-steps').style.display = 'block';
+            MathJax.typesetPromise();
+            document.getElementById('anti-steps-container').innerHTML = `
+                <div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-title">Hàm số</div><div class="step-formula">f(x) = ${expr}</div></div></div>
+                <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Nguyên hàm</div><div class="step-formula">∫ f(x) dx = ${result} + C</div></div></div>
+                <div class="step-card"><div class="step-num">3</div><div class="step-body"><div class="step-title">Kết quả</div><div class="step-formula"><span class="hi-g">F(x) = ${result} + C</span></div></div></div>
+            `;
+        }
+
+        function copyAntiderivativeSolution() {
+            const steps = document.getElementById('anti-steps-container').innerText;
+            navigator.clipboard.writeText("=== LỜI GIẢI NGUYÊN HÀM ===\n" + steps);
+            const btn = document.querySelector('#anti-steps .copy-sol-btn');
+            btn.textContent = '✅ Đã Copy!';
+            setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        }
+
+        function calculateDefiniteIntegral() {
+            const expr = document.getElementById('def-func').value;
+            const a = parseFloat(document.getElementById('def-a').value);
+            const b = parseFloat(document.getElementById('def-b').value);
+            const f = parseFunction(expr);
+            if (!f || isNaN(a) || isNaN(b)) { alert('❌ Vui lòng nhập đúng!'); return; }
+            const result = numericalIntegral(f, a, b);
+            document.getElementById('def-value').innerHTML = result.toFixed(8);
+            document.getElementById('def-result').style.display = 'block';
+            document.getElementById('def-steps').style.display = 'block';
+            document.getElementById('def-steps-container').innerHTML = `
+                <div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-title">Hàm số</div><div class="step-formula">f(x) = ${expr}</div></div></div>
+                <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Cận</div><div class="step-formula">a = ${a}, b = ${b}</div></div></div>
+                <div class="step-card"><div class="step-num">3</div><div class="step-body"><div class="step-title">Kết quả</div><div class="step-formula">I = <span class="hi-g">${result.toFixed(8)}</span></div></div></div>
+            `;
+        }
+
+        function copyDefiniteSolution() {
+            const steps = document.getElementById('def-steps-container').innerText;
+            navigator.clipboard.writeText("=== LỜI GIẢI TÍCH PHÂN ===\n" + steps);
+            const btn = document.querySelector('#def-steps .copy-sol-btn');
+            btn.textContent = '✅ Đã Copy!';
+            setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        }
+
+        function calculateArea() {
+            const exprF = document.getElementById('area-f').value;
+            const exprG = document.getElementById('area-g').value;
+            const a = parseFloat(document.getElementById('area-a').value);
+            const b = parseFloat(document.getElementById('area-b').value);
+            const f = parseFunction(exprF);
+            const g = parseFunction(exprG);
+            if (!f || !g) { alert('❌ Lỗi hàm số!'); return; }
+            const h = (x) => Math.abs(f(x) - g(x));
+            const area = numericalIntegral(h, a, b);
+            document.getElementById('area-value').innerHTML = area.toFixed(8) + " (đvdt)";
+            document.getElementById('area-result').style.display = 'block';
+        }
+
+        function calculateVolume() {
+            const exprF = document.getElementById('volume-f').value;
+            const a = parseFloat(document.getElementById('volume-a').value);
+            const b = parseFloat(document.getElementById('volume-b').value);
+            const f = parseFunction(exprF);
+            if (!f) { alert('❌ Lỗi hàm số!'); return; }
+            let volume;
+            if (currentVolumeAxis === 'ox') {
+                const h = (x) => Math.PI * Math.pow(f(x), 2);
+                volume = numericalIntegral(h, a, b);
+            } else {
+                const yMin = Math.min(f(a), f(b));
+                const yMax = Math.max(f(a), f(b));
+                const n = 500;
+                const dy = (yMax - yMin) / n;
+                let sum = 0;
+                for (let i = 0; i <= n; i++) {
+                    const y = yMin + i * dy;
+                    let x = 0;
+                    for (let t = a; t <= b; t += 0.05) {
+                        if (Math.abs(f(t) - y) < 0.05) { x = t; break; }
+                    }
+                    const r2 = x * x;
+                    if (i === 0 || i === n) sum += r2;
+                    else if (i % 2 === 0) sum += 2 * r2;
+                    else sum += 4 * r2;
+                }
+                volume = (dy / 3) * sum * Math.PI;
+            }
+            document.getElementById('volume-value').innerHTML = volume.toFixed(8) + " (đvtt)";
+            document.getElementById('volume-result').style.display = 'block';
+        }
+
+        function toggleCS() {
+            const sidebar = document.getElementById('cs-sidebar');
+            const overlay = document.getElementById('cs-overlay');
+            const isOpen = sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('visible', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+
+        function toggleSection(id) {
+            const sec = document.getElementById(id);
+            if (sec) sec.classList.toggle('collapsed');
+        }
+    </script>
+</body>
+</html>
