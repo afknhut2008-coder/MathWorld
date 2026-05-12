@@ -6,6 +6,8 @@
     <title>Hình học Oxyz - MathLab 12B2</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
         .mode-tabs {
             display: flex;
@@ -155,9 +157,6 @@
             font-size: 0.7rem;
             transition: 0.2s;
         }
-        .del-vertex:hover {
-            background: rgba(255,45,120,0.4);
-        }
         .btn-add {
             background: rgba(0,242,255,0.1);
             border: 1px dashed var(--neon-blue);
@@ -170,9 +169,6 @@
             font-family: var(--font-viet);
             font-size: 0.75rem;
             transition: 0.3s;
-        }
-        .btn-add:hover {
-            background: rgba(0,242,255,0.2);
         }
         .result-box {
             background: rgba(0,0,0,0.25);
@@ -266,21 +262,80 @@
             border-radius: 20px;
             cursor: pointer;
         }
+        .graph3d-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        #canvas3d {
+            width: 100%;
+            height: 450px;
+            background: #020617;
+            border-radius: 12px;
+            border: 1px solid rgba(0,242,255,0.2);
+        }
+        .function-list {
+            margin-top: 15px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .func-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+        }
+        .func-item input {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 8px;
+            color: white;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+        .func-color {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            background: rgba(0,242,255,0.15);
+            border: 1px solid var(--neon-blue);
+            border-radius: 20px;
+            color: var(--neon-blue);
+            cursor: pointer;
+        }
+        .calc-area-select {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+            color: white;
+            width: 100%;
+        }
         @media (max-width: 700px) {
             .plane-input, .line-input { grid-template-columns: 1fr 1fr; }
             .coord-input { grid-template-columns: 1fr; }
             .object-selector { flex-direction: column; }
             .vertex-row { flex-direction: column; align-items: stretch; }
-            .vertex-row .coord-group { justify-content: center; }
+            .func-item { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
     <nav>
         <div class="nav-container">
-            <a href="index.html" class="logo">
-                MATHLAB <span>12B2</span>
-            </a>
+            <a href="index.html" class="logo">MATHLAB <span>12B2</span></a>
             <ul>
                 <li><a href="index.html">Trang Chủ</a></li>
                 <li><a href="probability.html">Xác suất</a></li>
@@ -293,17 +348,18 @@
     <div class="container">
         <div class="glass-card">
             <div class="author-tag">BY MINH NHỰT</div>
-            <h2 class="title-neon">📐 HÌNH HỌC OXYZ</h2>
-            <p class="title-sub">Khoảng cách · Góc · Diện tích · Thể tích trong không gian</p>
+            <h2 class="title-neon">📐 HÌNH HỌC OXYZ & ĐỒ THỊ 3D</h2>
+            <p class="title-sub">Khoảng cách · Góc · Diện tích · Thể tích · Đồ thị 3D · Ứng dụng</p>
 
             <!-- Main tabs -->
             <div class="mode-tabs">
                 <div class="mode-tab" onclick="setMode('distance')">📏 KHOẢNG CÁCH</div>
                 <div class="mode-tab" onclick="setMode('angle')">📐 GÓC</div>
-                <div class="mode-tab active" onclick="setMode('area-volume')">📊 DIỆN TÍCH / THỂ TÍCH</div>
+                <div class="mode-tab" onclick="setMode('area-volume')">📊 DT / TT ĐA DIỆN</div>
+                <div class="mode-tab active" onclick="setMode('graph3d')">🎨 ĐỒ THỊ 3D</div>
             </div>
 
-            <!-- ========== KHOẢNG CÁCH ========== -->
+            <!-- ========== 1. KHOẢNG CÁCH ========== -->
             <div id="distance-mode" style="display:none;">
                 <div class="select-group">
                     <div class="object-selector">
@@ -326,22 +382,13 @@
                             <div id="obj2-inputs"></div>
                         </div>
                     </div>
-                    <button class="btn" onclick="calculateDistance()" style="width:100%; margin-top:10px;">📏 TÍNH KHOẢNG CÁCH</button>
+                    <button class="btn" onclick="calculateDistance()">📏 TÍNH KHOẢNG CÁCH</button>
                 </div>
-                <div id="dist-result" class="result-box" style="display:none;">
-                    <div class="result-label">🔹 KẾT QUẢ KHOẢNG CÁCH</div>
-                    <div class="result-value" id="dist-value"></div>
-                </div>
-                <div id="dist-steps" class="step-solution" style="display:none;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                        <span class="sec-label green">📝 Lời Giải Chi Tiết</span>
-                        <button class="copy-sol-btn" onclick="copyDistanceSolution()">📋 Copy</button>
-                    </div>
-                    <div id="dist-steps-container"></div>
-                </div>
+                <div id="dist-result" class="result-box" style="display:none;"><div class="result-label">🔹 KẾT QUẢ</div><div class="result-value" id="dist-value"></div></div>
+                <div id="dist-steps" class="step-solution" style="display:none;"><div style="display:flex; justify-content:space-between;"><span class="sec-label green">📝 Lời Giải</span><button class="copy-sol-btn" onclick="copyDistanceSolution()">📋 Copy</button></div><div id="dist-steps-container"></div></div>
             </div>
 
-            <!-- ========== GÓC ========== -->
+            <!-- ========== 2. GÓC ========== -->
             <div id="angle-mode" style="display:none;">
                 <div class="select-group">
                     <label>🔹 LOẠI GÓC</label>
@@ -352,7 +399,7 @@
                         <option value="plane-plane">📄 Góc giữa 2 mặt phẳng</option>
                     </select>
                     <div id="angle-inputs"></div>
-                    <div class="angle-buttons" id="angle-unit-buttons">
+                    <div class="angle-buttons">
                         <button class="angle-btn active" onclick="setAngleUnit('degree')">📐 Độ (°)</button>
                         <button class="angle-btn" onclick="setAngleUnit('radian')">📏 Radian (rad)</button>
                         <button class="angle-btn" onclick="setAngleUnit('sin')">📈 sin</button>
@@ -360,409 +407,227 @@
                         <button class="angle-btn" onclick="setAngleUnit('tan')">📊 tan</button>
                         <button class="angle-btn" onclick="setAngleUnit('cot')">🔄 cot</button>
                     </div>
-                    <button class="btn" onclick="calculateAngle()" style="width:100%; margin-top:15px;">📐 TÍNH GÓC</button>
+                    <button class="btn" onclick="calculateAngle()">📐 TÍNH GÓC</button>
                 </div>
-                <div id="angle-result" class="result-box" style="display:none;">
-                    <div class="result-label">🔹 KẾT QUẢ GÓC</div>
-                    <div class="result-value" id="angle-value"></div>
-                </div>
-                <div id="angle-steps" class="step-solution" style="display:none;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                        <span class="sec-label green">📝 Lời Giải Chi Tiết</span>
-                        <button class="copy-sol-btn" onclick="copyAngleSolution()">📋 Copy</button>
-                    </div>
-                    <div id="angle-steps-container"></div>
-                </div>
+                <div id="angle-result" class="result-box" style="display:none;"><div class="result-label">🔹 KẾT QUẢ</div><div class="result-value" id="angle-value"></div></div>
+                <div id="angle-steps" class="step-solution" style="display:none;"><div style="display:flex; justify-content:space-between;"><span class="sec-label green">📝 Lời Giải</span><button class="copy-sol-btn" onclick="copyAngleSolution()">📋 Copy</button></div><div id="angle-steps-container"></div></div>
             </div>
 
-            <!-- ========== DIỆN TÍCH / THỂ TÍCH ========== -->
-            <div id="area-volume-mode">
+            <!-- ========== 3. DIỆN TÍCH / THỂ TÍCH ĐA DIỆN ========== -->
+            <div id="area-volume-mode" style="display:none;">
                 <div class="sub-tabs">
-                    <div class="sub-tab active" onclick="setAreaVolMode('area')">📐 DIỆN TÍCH</div>
-                    <div class="sub-tab" onclick="setAreaVolMode('volume')">🧊 THỂ TÍCH</div>
+                    <div class="sub-tab active" onclick="setAreaVolMode('area')">📐 DIỆN TÍCH ĐA GIÁC</div>
+                    <div class="sub-tab" onclick="setAreaVolMode('volume')">🧊 THỂ TÍCH KHỐI ĐA DIỆN</div>
                 </div>
-
-                <!-- Diện tích -->
                 <div id="area-submode">
                     <div class="select-group">
-                        <label>🔹 NHẬP TỌA ĐỘ CÁC ĐỈNH (theo thứ tự, cùng mặt phẳng)</label>
+                        <label>🔹 NHẬP TỌA ĐỘ CÁC ĐỈNH</label>
                         <div class="vertices-container" id="area-vertices-container">
-                            <div class="vertex-row" data-idx="0">
-                                <span class="vertex-label">A₁</span>
-                                <div class="coord-group">
-                                    <input type="number" class="coord-x" placeholder="x" value="0" step="0.1">
-                                    <input type="number" class="coord-y" placeholder="y" value="0" step="0.1">
-                                    <input type="number" class="coord-z" placeholder="z" value="0" step="0.1">
-                                </div>
-                                <button class="del-vertex" onclick="removeVertex('area', this)">🗑️</button>
-                            </div>
-                            <div class="vertex-row" data-idx="1">
-                                <span class="vertex-label">A₂</span>
-                                <div class="coord-group">
-                                    <input type="number" class="coord-x" placeholder="x" value="1" step="0.1">
-                                    <input type="number" class="coord-y" placeholder="y" value="0" step="0.1">
-                                    <input type="number" class="coord-z" placeholder="z" value="0" step="0.1">
-                                </div>
-                                <button class="del-vertex" onclick="removeVertex('area', this)">🗑️</button>
-                            </div>
-                            <div class="vertex-row" data-idx="2">
-                                <span class="vertex-label">A₃</span>
-                                <div class="coord-group">
-                                    <input type="number" class="coord-x" placeholder="x" value="0" step="0.1">
-                                    <input type="number" class="coord-y" placeholder="y" value="1" step="0.1">
-                                    <input type="number" class="coord-z" placeholder="z" value="0" step="0.1">
-                                </div>
-                                <button class="del-vertex" onclick="removeVertex('area', this)">🗑️</button>
-                            </div>
+                            <div class="vertex-row"><span class="vertex-label">A₁</span><div class="coord-group"><input type="number" class="coord-x" value="0"><input type="number" class="coord-y" value="0"><input type="number" class="coord-z" value="0"></div><button class="del-vertex" onclick="removeVertex('area', this)">🗑️</button></div>
+                            <div class="vertex-row"><span class="vertex-label">A₂</span><div class="coord-group"><input type="number" class="coord-x" value="1"><input type="number" class="coord-y" value="0"><input type="number" class="coord-z" value="0"></div><button class="del-vertex" onclick="removeVertex('area', this)">🗑️</button></div>
+                            <div class="vertex-row"><span class="vertex-label">A₃</span><div class="coord-group"><input type="number" class="coord-x" value="0"><input type="number" class="coord-y" value="1"><input type="number" class="coord-z" value="0"></div><button class="del-vertex" onclick="removeVertex('area', this)">🗑️</button></div>
                         </div>
                         <button class="btn-add" onclick="addVertex('area')">➕ Thêm đỉnh</button>
-                        <button class="btn" onclick="calculateArea()" style="width:100%; margin-top:15px;">📐 TÍNH DIỆN TÍCH</button>
+                        <button class="btn" onclick="calculatePolygonArea()">📐 TÍNH DIỆN TÍCH</button>
                     </div>
-                    <div id="area-result" class="result-box" style="display:none;">
-                        <div class="result-label">🔹 DIỆN TÍCH</div>
-                        <div class="result-value" id="area-value"></div>
-                    </div>
+                    <div id="area-result" class="result-box" style="display:none;"><div class="result-label">🔹 DIỆN TÍCH</div><div class="result-value" id="area-value"></div></div>
                 </div>
-
-                <!-- Thể tích -->
                 <div id="volume-submode" style="display:none;">
                     <div class="select-group">
                         <label>🔹 NHẬP TỌA ĐỘ CÁC ĐỈNH</label>
                         <div class="vertices-container" id="volume-vertices-container">
-                            <div class="vertex-row" data-idx="0">
-                                <span class="vertex-label">A₁</span>
-                                <div class="coord-group">
-                                    <input type="number" class="coord-x" placeholder="x" value="0" step="0.1">
-                                    <input type="number" class="coord-y" placeholder="y" value="0" step="0.1">
-                                    <input type="number" class="coord-z" placeholder="z" value="0" step="0.1">
-                                </div>
-                                <button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button>
-                            </div>
-                            <div class="vertex-row" data-idx="1">
-                                <span class="vertex-label">A₂</span>
-                                <div class="coord-group">
-                                    <input type="number" class="coord-x" placeholder="x" value="1" step="0.1">
-                                    <input type="number" class="coord-y" placeholder="y" value="0" step="0.1">
-                                    <input type="number" class="coord-z" placeholder="z" value="0" step="0.1">
-                                </div>
-                                <button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button>
-                            </div>
-                            <div class="vertex-row" data-idx="2">
-                                <span class="vertex-label">A₃</span>
-                                <div class="coord-group">
-                                    <input type="number" class="coord-x" placeholder="x" value="0" step="0.1">
-                                    <input type="number" class="coord-y" placeholder="y" value="1" step="0.1">
-                                    <input type="number" class="coord-z" placeholder="z" value="0" step="0.1">
-                                </div>
-                                <button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button>
-                            </div>
-                            <div class="vertex-row" data-idx="3">
-                                <span class="vertex-label">A₄</span>
-                                <div class="coord-group">
-                                    <input type="number" class="coord-x" placeholder="x" value="0" step="0.1">
-                                    <input type="number" class="coord-y" placeholder="y" value="0" step="0.1">
-                                    <input type="number" class="coord-z" placeholder="z" value="1" step="0.1">
-                                </div>
-                                <button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button>
-                            </div>
+                            <div class="vertex-row"><span class="vertex-label">A₁</span><div class="coord-group"><input type="number" class="coord-x" value="0"><input type="number" class="coord-y" value="0"><input type="number" class="coord-z" value="0"></div><button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button></div>
+                            <div class="vertex-row"><span class="vertex-label">A₂</span><div class="coord-group"><input type="number" class="coord-x" value="1"><input type="number" class="coord-y" value="0"><input type="number" class="coord-z" value="0"></div><button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button></div>
+                            <div class="vertex-row"><span class="vertex-label">A₃</span><div class="coord-group"><input type="number" class="coord-x" value="0"><input type="number" class="coord-y" value="1"><input type="number" class="coord-z" value="0"></div><button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button></div>
+                            <div class="vertex-row"><span class="vertex-label">A₄</span><div class="coord-group"><input type="number" class="coord-x" value="0"><input type="number" class="coord-y" value="0"><input type="number" class="coord-z" value="1"></div><button class="del-vertex" onclick="removeVertex('volume', this)">🗑️</button></div>
                         </div>
                         <button class="btn-add" onclick="addVertex('volume')">➕ Thêm đỉnh</button>
-                        <button class="btn" onclick="calculateVolume()" style="width:100%; margin-top:15px;">🧊 TÍNH THỂ TÍCH</button>
+                        <button class="btn" onclick="calculatePolygonVolume()">🧊 TÍNH THỂ TÍCH</button>
                     </div>
-                    <div id="volume-result" class="result-box" style="display:none;">
-                        <div class="result-label">🔹 THỂ TÍCH</div>
-                        <div class="result-value" id="volume-value"></div>
+                    <div id="volume-result" class="result-box" style="display:none;"><div class="result-label">🔹 THỂ TÍCH</div><div class="result-value" id="volume-value"></div></div>
+                </div>
+                <div id="area-vol-steps" class="step-solution" style="display:none;"><div style="display:flex; justify-content:space-between;"><span class="sec-label green">📝 Lời Giải</span><button class="copy-sol-btn" onclick="copyAreaVolSolution()">📋 Copy</button></div><div id="area-vol-steps-container"></div></div>
+            </div>
+
+            <!-- ========== 4. ĐỒ THỊ 3D & ỨNG DỤNG ========== -->
+            <div id="graph3d-mode">
+                <div class="graph3d-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span class="sec-label blue">🎨 ĐỒ THỊ HÀM SỐ z = f(x, y)</span>
+                        <div><button class="btn-small" onclick="addFunction()">➕ Thêm hàm</button><button class="btn-small" onclick="resetGraph()" style="margin-left:8px;">🔄 Reset</button></div>
+                    </div>
+                    <div id="canvas3d" style="width:100%; height:450px;"></div>
+                    <div class="function-list" id="function-list">
+                        <div class="func-item"><span style="color:#00f2ff;">z₁ =</span><input type="text" class="func-expr" value="sin(x)*cos(y)" oninput="updateGraph()"><div class="func-color" style="background:#00f2ff;" onclick="changeColor(this)"></div><button class="btn-small" onclick="removeFunction(this)">✖</button></div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:15px;">
+                        <div><label>X min</label><input type="number" id="xmin" value="-3" step="0.5" onchange="updateGraph()"></div>
+                        <div><label>X max</label><input type="number" id="xmax" value="3" step="0.5" onchange="updateGraph()"></div>
+                        <div><label>Y min</label><input type="number" id="ymin" value="-3" step="0.5" onchange="updateGraph()"></div>
+                        <div><label>Y max</label><input type="number" id="ymax" value="3" step="0.5" onchange="updateGraph()"></div>
+                        <div><label>Độ chia lưới</label><input type="number" id="gridSize" value="50" min="20" max="100" step="10" onchange="updateGraph()"></div>
+                        <div><label>Độ trong suốt</label><input type="range" id="opacity" min="0.3" max="1" step="0.05" value="0.7" onchange="updateGraph()"></div>
                     </div>
                 </div>
 
-                <div id="area-vol-steps" class="step-solution" style="display:none;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                        <span class="sec-label green">📝 Lời Giải Chi Tiết</span>
-                        <button class="copy-sol-btn" onclick="copyAreaVolSolution()">📋 Copy</button>
+                <!-- Tính năng ứng dụng -->
+                <div class="select-group">
+                    <div class="sub-tabs" style="margin-bottom:15px;">
+                        <div class="sub-tab active" onclick="setAppCalcMode('volume')">🧊 THỂ TÍCH DƯỚI MẶT</div>
+                        <div class="sub-tab" onclick="setAppCalcMode('surface')">📐 DIỆN TÍCH MẶT CONG</div>
+                        <div class="sub-tab" onclick="setAppCalcMode('solid')">🏔️ THỂ TÍCH GIỮA 2 MẶT</div>
                     </div>
-                    <div id="area-vol-steps-container"></div>
+                    
+                    <div id="app-calc-volume">
+                        <label>🔹 Hàm số z = f(x,y)</label>
+                        <select id="volume-func-select" class="calc-area-select" onchange="updateVolumePreview()"></select>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-top:12px;">
+                            <div><label>x từ</label><input type="number" id="vol-xmin" value="-2" step="0.5" onchange="updateVolumePreview()"></div>
+                            <div><label>đến</label><input type="number" id="vol-xmax" value="2" step="0.5" onchange="updateVolumePreview()"></div>
+                            <div><label>y từ</label><input type="number" id="vol-ymin" value="-2" step="0.5" onchange="updateVolumePreview()"></div>
+                            <div><label>đến</label><input type="number" id="vol-ymax" value="2" step="0.5" onchange="updateVolumePreview()"></div>
+                        </div>
+                        <div id="volume-preview" class="result-box" style="display:none; margin-top:10px;"><div class="result-label">🔹 Kết quả sơ bộ</div><div class="result-value" id="volume-preview-value"></div></div>
+                        <button class="btn" onclick="calculateVolumeUnder()" style="margin-top:12px; width:100%;">🧊 TÍNH CHÍNH XÁC THỂ TÍCH</button>
+                    </div>
+                    
+                    <div id="app-calc-surface" style="display:none;">
+                        <label>🔹 Hàm số z = f(x,y)</label>
+                        <select id="surface-func-select" class="calc-area-select"></select>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-top:12px;">
+                            <div><label>x từ</label><input type="number" id="surf-xmin" value="-2" step="0.5"></div>
+                            <div><label>đến</label><input type="number" id="surf-xmax" value="2" step="0.5"></div>
+                            <div><label>y từ</label><input type="number" id="surf-ymin" value="-2" step="0.5"></div>
+                            <div><label>đến</label><input type="number" id="surf-ymax" value="2" step="0.5"></div>
+                        </div>
+                        <button class="btn" onclick="calculateSurfaceArea()" style="margin-top:12px; width:100%;">📐 TÍNH DIỆN TÍCH MẶT CONG</button>
+                    </div>
+                    
+                    <div id="app-calc-solid" style="display:none;">
+                        <label>🔹 Mặt trên z₁ =</label>
+                        <select id="solid-top-func" class="calc-area-select"></select>
+                        <label style="margin-top:10px;">🔹 Mặt dưới z₂ =</label>
+                        <select id="solid-bottom-func" class="calc-area-select"></select>
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-top:12px;">
+                            <div><label>x từ</label><input type="number" id="solid-xmin" value="-2" step="0.5"></div>
+                            <div><label>đến</label><input type="number" id="solid-xmax" value="2" step="0.5"></div>
+                            <div><label>y từ</label><input type="number" id="solid-ymin" value="-2" step="0.5"></div>
+                            <div><label>đến</label><input type="number" id="solid-ymax" value="2" step="0.5"></div>
+                        </div>
+                        <button class="btn" onclick="calculateSolidVolume()" style="margin-top:12px; width:100%;">🏔️ TÍNH THỂ TÍCH VẬT THỂ</button>
+                    </div>
                 </div>
+
+                <div id="app-result" class="result-box" style="display:none;"><div class="result-label">🔹 KẾT QUẢ</div><div class="result-value" id="app-result-value"></div></div>
+                <div id="app-steps" class="step-solution" style="display:none;"><div style="display:flex; justify-content:space-between;"><span class="sec-label green">📝 Lời Giải Chi Tiết</span><button class="copy-sol-btn" onclick="copyAppSolution()">📋 Copy</button></div><div id="app-steps-container"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- CHEAT SHEET SIDEBAR (chứa công thức) -->
-    <button class="cs-toggle-btn" onclick="toggleCS()" aria-label="Mở Cheat Sheet">
-        <span class="cs-icon">📐</span>CÔNG THỨC
-    </button>
+    <!-- CHEAT SHEET SIDEBAR -->
+    <button class="cs-toggle-btn" onclick="toggleCS()"><span class="cs-icon">📐</span>CÔNG THỨC</button>
     <div class="cs-overlay" id="cs-overlay" onclick="toggleCS()"></div>
     <div class="cs-sidebar" id="cs-sidebar">
-        <div class="cs-header">
-            <h3>📐 CHEAT SHEET - OXYZ</h3>
-            <button class="cs-close" onclick="toggleCS()">✕</button>
-        </div>
-
-        <!-- Khoảng cách -->
-        <div class="cs-section" id="cs-distance">
-            <div class="cs-section-header c-blue" onclick="toggleSection('cs-distance')">
-                🔵 KHOẢNG CÁCH
-                <span class="cs-chevron">▼</span>
-            </div>
+        <div class="cs-header"><h3>📐 CHEAT SHEET - OXYZ</h3><button class="cs-close" onclick="toggleCS()">✕</button></div>
+        
+        <div class="cs-section" id="cs-dist">
+            <div class="cs-section-header c-blue" onclick="toggleSection('cs-dist')">📏 KHOẢNG CÁCH<span class="cs-chevron">▼</span></div>
             <div class="cs-section-body">
-                <div class="cs-formula">
-                    <span class="cs-f-name">Điểm - Điểm</span>
-                    <div class="cs-f-math">\(d(A,B) = \sqrt{(x_B-x_A)^2 + (y_B-y_A)^2 + (z_B-z_A)^2}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Điểm - Mặt phẳng</span>
-                    <div class="cs-f-math">\(d(M,(P)) = \frac{|ax_0+by_0+cz_0+d|}{\sqrt{a^2+b^2+c^2}}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Điểm - Đường thẳng</span>
-                    <div class="cs-f-math">\(d(M,\Delta) = \frac{|[\vec{AM}, \vec{u}]|}{|\vec{u}|}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">2 Đường thẳng chéo nhau</span>
-                    <div class="cs-f-math">\(d(\Delta_1,\Delta_2) = \frac{|[\vec{u_1},\vec{u_2}] \cdot \vec{A_1A_2}|}{\|[\vec{u_1},\vec{u_2}]\|}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Đường thẳng // Mặt phẳng</span>
-                    <div class="cs-f-math">\(d(\Delta,(P)) = \frac{|ax_0+by_0+cz_0+d|}{\sqrt{a^2+b^2+c^2}}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">2 Mặt phẳng song song</span>
-                    <div class="cs-f-math">\(d((P),(Q)) = \frac{|d_2-d_1|}{\sqrt{a^2+b^2+c^2}}\)</div>
-                </div>
+                <div class="cs-formula"><div class="cs-f-math">\(d(A,B)=\sqrt{(x_2-x_1)^2+(y_2-y_1)^2+(z_2-z_1)^2}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(d(M,(P))=\frac{|Ax_0+By_0+Cz_0+D|}{\sqrt{A^2+B^2+C^2}}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(d(M,\Delta)=\frac{|[\vec{AM},\vec{u}]|}{|\vec{u}|}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(d(\Delta_1,\Delta_2)=\frac{|[\vec{u_1},\vec{u_2}]\cdot\vec{A_1A_2}|}{\|[\vec{u_1},\vec{u_2}]\|}\)</div></div>
             </div>
         </div>
-
-        <!-- Góc -->
+        
         <div class="cs-section" id="cs-angle">
-            <div class="cs-section-header c-green" onclick="toggleSection('cs-angle')">
-                🟢 GÓC
-                <span class="cs-chevron">▼</span>
-            </div>
+            <div class="cs-section-header c-green" onclick="toggleSection('cs-angle')">📐 GÓC<span class="cs-chevron">▼</span></div>
             <div class="cs-section-body">
-                <div class="cs-formula">
-                    <span class="cs-f-name">Giữa 2 vector</span>
-                    <div class="cs-f-math">\(\cos\varphi = \frac{|\vec{u}\cdot\vec{v}|}{\|\vec{u}\|\|\vec{v}\|}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Giữa 2 đường thẳng</span>
-                    <div class="cs-f-math">\(\cos\varphi = \frac{|\vec{u_1}\cdot\vec{u_2}|}{\|\vec{u_1}\|\|\vec{u_2}\|}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Đường thẳng & Mặt phẳng</span>
-                    <div class="cs-f-math">\(\sin\varphi = \frac{|\vec{u}\cdot\vec{n}|}{\|\vec{u}\|\|\vec{n}\|}\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Giữa 2 mặt phẳng</span>
-                    <div class="cs-f-math">\(\cos\varphi = \frac{|\vec{n_1}\cdot\vec{n_2}|}{\|\vec{n_1}\|\|\vec{n_2}\|}\)</div>
-                </div>
+                <div class="cs-formula"><div class="cs-f-math">\(\cos\varphi=\frac{|\vec{u}\cdot\vec{v}|}{|\vec{u}||\vec{v}|}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\sin\varphi=\frac{|\vec{u}\cdot\vec{n}|}{|\vec{u}||\vec{n}|}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\cos\varphi=\frac{|\vec{n_1}\cdot\vec{n_2}|}{|\vec{n_1}||\vec{n_2}|}\)</div></div>
             </div>
         </div>
-
-        <!-- Diện tích & Thể tích -->
+        
         <div class="cs-section" id="cs-area-vol">
-            <div class="cs-section-header c-yellow" onclick="toggleSection('cs-area-vol')">
-                🟡 DIỆN TÍCH & THỂ TÍCH
-                <span class="cs-chevron">▼</span>
-            </div>
+            <div class="cs-section-header c-yellow" onclick="toggleSection('cs-area-vol')">📊 DT & TT ĐA DIỆN<span class="cs-chevron">▼</span></div>
             <div class="cs-section-body">
-                <div class="cs-formula">
-                    <span class="cs-f-name">Diện tích tam giác</span>
-                    <div class="cs-f-math">\(S_{\triangle ABC} = \frac{1}{2}|\vec{AB} \times \vec{AC}|\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Diện tích đa giác</span>
-                    <div class="cs-f-math">\(S = \frac{1}{2}\left|\sum_{i=1}^n \vec{OA_i} \times \vec{OA_{i+1}}\right|\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Thể tích tứ diện</span>
-                    <div class="cs-f-math">\(V = \frac{1}{6}|[\vec{AB},\vec{AC}] \cdot \vec{AD}|\)</div>
-                </div>
-                <div class="cs-formula">
-                    <span class="cs-f-name">Thể tích hình hộp</span>
-                    <div class="cs-f-math">\(V = |[\vec{AB},\vec{AC}] \cdot \vec{AD}|\)</div>
-                </div>
+                <div class="cs-formula"><div class="cs-f-math">\(S_{\triangle ABC}=\frac{1}{2}|\vec{AB}\times\vec{AC}|\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(S_{\text{đa giác}}=\frac{1}{2}\left|\sum_{i=1}^n \vec{OA_i}\times\vec{OA_{i+1}}\right|\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(V_{\text{tứ diện}}=\frac{1}{6}|[\vec{AB},\vec{AC}]\cdot\vec{AD}|\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(V_{\text{hình hộp}}=|[\vec{AB},\vec{AC}]\cdot\vec{AD}|\)</div></div>
+            </div>
+        </div>
+        
+        <div class="cs-section" id="cs-surface">
+            <div class="cs-section-header c-purple" onclick="toggleSection('cs-surface')">📈 MẶT CONG & ỨNG DỤNG<span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(V_{\text{dưới mặt}}=\iint_D f(x,y)dxdy\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(S_{\text{mặt cong}}=\iint_D\sqrt{1+z_x^2+z_y^2}dxdy\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(V_{\text{giữa 2 mặt}}=\iint_D (z_{\text{trên}}-z_{\text{dưới}})dxdy\)</div></div>
+            </div>
+        </div>
+        
+        <div class="cs-section" id="cs-line">
+            <div class="cs-section-header c-blue" onclick="toggleSection('cs-line')">📈 ĐƯỜNG THẲNG<span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(\frac{x-x_0}{a}=\frac{y-y_0}{b}=\frac{z-z_0}{c}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\begin{cases}x=x_0+at\\y=y_0+bt\\z=z_0+ct\end{cases}\)</div></div>
+            </div>
+        </div>
+        
+        <div class="cs-section" id="cs-plane">
+            <div class="cs-section-header c-green" onclick="toggleSection('cs-plane')">📄 MẶT PHẲNG<span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(A(x-x_0)+B(y-y_0)+C(z-z_0)=0\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(Ax+By+Cz+D=0\)</div></div>
+            </div>
+        </div>
+        
+        <div class="cs-section" id="cs-sphere">
+            <div class="cs-section-header c-yellow" onclick="toggleSection('cs-sphere')">⚪ MẶT CẦU<span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\((x-a)^2+(y-b)^2+(z-c)^2=R^2\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(x^2+y^2+z^2-2ax-2by-2cz+d=0\)</div></div>
+            </div>
+        </div>
+        
+        <div class="cs-section" id="cs-cylinder">
+            <div class="cs-section-header c-pink" onclick="toggleSection('cs-cylinder')">🧴 MẶT TRỤ<span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(x^2+y^2=R^2\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\frac{x^2}{a^2}+\frac{y^2}{b^2}=1\)</div></div>
+            </div>
+        </div>
+        
+        <div class="cs-section" id="cs-paraboloid">
+            <div class="cs-section-header c-purple" onclick="toggleSection('cs-paraboloid')">🏔️ PARABOLOID<span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(z=\frac{x^2}{a^2}+\frac{y^2}{b^2}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(z=\frac{x^2}{a^2}-\frac{y^2}{b^2}\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(z=x^2+y^2\)</div></div>
+            </div>
+        </div>
+        
+        <div class="cs-section" id="cs-hyperboloid">
+            <div class="cs-section-header c-orange" onclick="toggleSection('cs-hyperboloid')">⏳ HYPERBOLOID<span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula"><div class="cs-f-math">\(\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=1\)</div></div>
+                <div class="cs-formula"><div class="cs-f-math">\(\frac{x^2}{a^2}+\frac{y^2}{b^2}-\frac{z^2}{c^2}=-1\)</div></div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
     <script>
-        let currentMode = 'area-volume';
-        let currentAreaVolMode = 'area';
+        // ========== BIẾN TOÀN CỤC ==========
+        let currentMode = 'graph3d';
         let currentAngleUnit = 'degree';
+        let currentAreaVolMode = 'area';
+        let currentAppCalcMode = 'volume';
+        let scene, camera, renderer, controls, meshes = [];
+        let appFunctions = [];
 
-        // ========== QUẢN LÝ ĐỈNH ==========
-        function updateVertexLabels(containerId) {
-            const container = document.getElementById(containerId);
-            const rows = container.querySelectorAll('.vertex-row');
-            rows.forEach((row, idx) => {
-                const label = row.querySelector('.vertex-label');
-                if (label) label.textContent = String.fromCharCode(65 + idx) + (idx >= 26 ? (idx+1) : '');
-                row.setAttribute('data-idx', idx);
-            });
-        }
-
-        function addVertex(type) {
-            const containerId = type === 'area' ? 'area-vertices-container' : 'volume-vertices-container';
-            const container = document.getElementById(containerId);
-            const newIdx = container.children.length;
-            const letter = String.fromCharCode(65 + newIdx) + (newIdx >= 26 ? (newIdx+1) : '');
-            const newRow = document.createElement('div');
-            newRow.className = 'vertex-row';
-            newRow.setAttribute('data-idx', newIdx);
-            newRow.innerHTML = `
-                <span class="vertex-label">${letter}</span>
-                <div class="coord-group">
-                    <input type="number" class="coord-x" placeholder="x" value="0" step="0.1">
-                    <input type="number" class="coord-y" placeholder="y" value="0" step="0.1">
-                    <input type="number" class="coord-z" placeholder="z" value="0" step="0.1">
-                </div>
-                <button class="del-vertex" onclick="removeVertex('${type}', this)">🗑️</button>
-            `;
-            container.appendChild(newRow);
-            updateVertexLabels(containerId);
-        }
-
-        function removeVertex(type, btn) {
-            const row = btn.closest('.vertex-row');
-            const containerId = type === 'area' ? 'area-vertices-container' : 'volume-vertices-container';
-            const container = document.getElementById(containerId);
-            const minVertices = type === 'area' ? 3 : 4;
-            if (container.children.length <= minVertices) {
-                alert(`⚠️ Cần ít nhất ${minVertices} đỉnh để tính ${type === 'area' ? 'diện tích' : 'thể tích'}!`);
-                return;
-            }
-            row.remove();
-            updateVertexLabels(containerId);
-        }
-
-        function getVertices(type) {
-            const containerId = type === 'area' ? 'area-vertices-container' : 'volume-vertices-container';
-            const vertices = [];
-            const rows = document.querySelectorAll(`#${containerId} .vertex-row`);
-            rows.forEach(row => {
-                const x = parseFloat(row.querySelector('.coord-x')?.value || 0);
-                const y = parseFloat(row.querySelector('.coord-y')?.value || 0);
-                const z = parseFloat(row.querySelector('.coord-z')?.value || 0);
-                vertices.push([x, y, z]);
-            });
-            return vertices;
-        }
-
-        // ========== HÀM TOÁN HỌC ==========
-        function vectorCross(a, b) {
-            return [
-                a[1]*b[2] - a[2]*b[1],
-                a[2]*b[0] - a[0]*b[2],
-                a[0]*b[1] - a[1]*b[0]
-            ];
-        }
-
-        function vectorNorm(v) {
-            return Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-        }
-
-        function scalarTriple(a, b, c) {
-            const cross = vectorCross(a, b);
-            return cross[0]*c[0] + cross[1]*c[1] + cross[2]*c[2];
-        }
-
-        // ========== TÍNH DIỆN TÍCH ==========
-        function calculateArea() {
-            const vertices = getVertices('area');
-            if (vertices.length < 3) {
-                alert('⚠️ Cần ít nhất 3 đỉnh để tính diện tích!');
-                return;
-            }
-            
-            let area = 0;
-            let steps = [`Các đỉnh: ${vertices.map((v, i) => `${String.fromCharCode(65+i)}(${v[0]},${v[1]},${v[2]})`).join(', ')}`];
-            
-            if (vertices.length === 3) {
-                const AB = [vertices[1][0]-vertices[0][0], vertices[1][1]-vertices[0][1], vertices[1][2]-vertices[0][2]];
-                const AC = [vertices[2][0]-vertices[0][0], vertices[2][1]-vertices[0][1], vertices[2][2]-vertices[0][2]];
-                const cross = vectorCross(AB, AC);
-                area = 0.5 * vectorNorm(cross);
-                steps.push(`Vectơ AB = (${AB[0].toFixed(2)}, ${AB[1].toFixed(2)}, ${AB[2].toFixed(2)})`);
-                steps.push(`Vectơ AC = (${AC[0].toFixed(2)}, ${AC[1].toFixed(2)}, ${AC[2].toFixed(2)})`);
-                steps.push(`Tích có hướng [AB, AC] = (${cross[0].toFixed(4)}, ${cross[1].toFixed(4)}, ${cross[2].toFixed(4)})`);
-                steps.push(`<span class="hi-g">Diện tích S = 1/2 × |[AB, AC]| = ${area.toFixed(8)} (đvdt)</span>`);
-            } else {
-                let sum = [0, 0, 0];
-                for (let i = 0; i < vertices.length; i++) {
-                    const v1 = vertices[i];
-                    const v2 = vertices[(i+1) % vertices.length];
-                    const cross = vectorCross(v1, v2);
-                    sum[0] += cross[0];
-                    sum[1] += cross[1];
-                    sum[2] += cross[2];
-                }
-                area = 0.5 * vectorNorm(sum);
-                steps.push(`<span class="hi-g">Diện tích S = 1/2 × |∑(A_i × A_{i+1})| = ${area.toFixed(8)} (đvdt)</span>`);
-            }
-            
-            document.getElementById('area-value').innerHTML = area.toFixed(8) + " (đvdt)";
-            document.getElementById('area-result').style.display = 'block';
-            document.getElementById('area-vol-steps').style.display = 'block';
-            document.getElementById('area-vol-steps-container').innerHTML = steps.map((s, i) => `
-                <div class="step-card"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-formula">${s}</div></div></div>
-            `).join('');
-        }
-
-        // ========== TÍNH THỂ TÍCH ==========
-        function calculateVolume() {
-            const vertices = getVertices('volume');
-            if (vertices.length < 4) {
-                alert('⚠️ Cần ít nhất 4 đỉnh để tính thể tích!');
-                return;
-            }
-            
-            let volume = 0;
-            let steps = [`Các đỉnh: ${vertices.map((v, i) => `${String.fromCharCode(65+i)}(${v[0]},${v[1]},${v[2]})`).join(', ')}`];
-            
-            if (vertices.length === 4) {
-                const AB = [vertices[1][0]-vertices[0][0], vertices[1][1]-vertices[0][1], vertices[1][2]-vertices[0][2]];
-                const AC = [vertices[2][0]-vertices[0][0], vertices[2][1]-vertices[0][1], vertices[2][2]-vertices[0][2]];
-                const AD = [vertices[3][0]-vertices[0][0], vertices[3][1]-vertices[0][1], vertices[3][2]-vertices[0][2]];
-                const triple = scalarTriple(AB, AC, AD);
-                volume = Math.abs(triple) / 6;
-                steps.push(`<span class="hi-g">Thể tích tứ diện V = 1/6 × |[AB, AC]·AD| = ${volume.toFixed(8)} (đvtt)</span>`);
-            } else if (vertices.length === 8) {
-                const AB = [vertices[1][0]-vertices[0][0], vertices[1][1]-vertices[0][1], vertices[1][2]-vertices[0][2]];
-                const AC = [vertices[2][0]-vertices[0][0], vertices[2][1]-vertices[0][1], vertices[2][2]-vertices[0][2]];
-                const AD = [vertices[4][0]-vertices[0][0], vertices[4][1]-vertices[0][1], vertices[4][2]-vertices[0][2]];
-                const triple = scalarTriple(AB, AC, AD);
-                volume = Math.abs(triple);
-                steps.push(`<span class="hi-g">Thể tích hình hộp V = |[AB, AC]·AD| = ${volume.toFixed(8)} (đvtt)</span>`);
-            } else {
-                let totalVol = 0;
-                for (let i = 2; i < vertices.length - 1; i++) {
-                    const AB = [vertices[1][0]-vertices[0][0], vertices[1][1]-vertices[0][1], vertices[1][2]-vertices[0][2]];
-                    const AC = [vertices[i][0]-vertices[0][0], vertices[i][1]-vertices[0][1], vertices[i][2]-vertices[0][2]];
-                    const AD = [vertices[i+1][0]-vertices[0][0], vertices[i+1][1]-vertices[0][1], vertices[i+1][2]-vertices[0][2]];
-                    const triple = scalarTriple(AB, AC, AD);
-                    totalVol += Math.abs(triple);
-                }
-                volume = totalVol / 6;
-                steps.push(`<span class="hi-g">Thể tích V = ${volume.toFixed(8)} (đvtt)</span>`);
-            }
-            
-            document.getElementById('volume-value').innerHTML = volume.toFixed(8) + " (đvtt)";
-            document.getElementById('volume-result').style.display = 'block';
-            document.getElementById('area-vol-steps').style.display = 'block';
-            document.getElementById('area-vol-steps-container').innerHTML = steps.map((s, i) => `
-                <div class="step-card"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-formula">${s}</div></div></div>
-            `).join('');
-        }
-
-        function copyAreaVolSolution() {
-            const steps = document.getElementById('area-vol-steps-container').innerText;
-            navigator.clipboard.writeText("=== LỜI GIẢI DIỆN TÍCH / THỂ TÍCH ===\n" + steps);
-            const btn = document.querySelector('#area-vol-steps .copy-sol-btn');
-            btn.textContent = '✅ Đã Copy!';
-            setTimeout(() => btn.textContent = '📋 Copy', 2000);
-        }
-
-        // ========== CÁC HÀM KHÁC ==========
+        // ========== CHUYỂN TAB CHÍNH ==========
         function setMode(mode) {
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(tab => tab.classList.remove('active'));
@@ -770,8 +635,10 @@
             document.getElementById('distance-mode').style.display = mode === 'distance' ? 'block' : 'none';
             document.getElementById('angle-mode').style.display = mode === 'angle' ? 'block' : 'none';
             document.getElementById('area-volume-mode').style.display = mode === 'area-volume' ? 'block' : 'none';
+            document.getElementById('graph3d-mode').style.display = mode === 'graph3d' ? 'block' : 'none';
             if (mode === 'distance') updateDistanceInputs();
             if (mode === 'angle') updateAngleInputs();
+            if (mode === 'graph3d') { setTimeout(() => { if (!scene) init3D(); else updateGraph(); updateFunctionSelects(); }, 100); }
         }
 
         function setAreaVolMode(mode) {
@@ -786,210 +653,343 @@
                 document.getElementById('volume-submode').style.display = 'block';
                 document.querySelector('#area-volume-mode .sub-tabs .sub-tab:last-child').classList.add('active');
             }
-            document.getElementById('area-vol-steps').style.display = 'none';
         }
 
-        function setAngleUnit(unit) {
-            currentAngleUnit = unit;
-            document.querySelectorAll('.angle-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            if (document.getElementById('angle-result').style.display === 'block') calculateAngle();
+        function setAppCalcMode(mode) {
+            currentAppCalcMode = mode;
+            document.querySelectorAll('#app-calc-volume, #app-calc-surface, #app-calc-solid').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#graph3d-mode .sub-tab').forEach(tab => tab.classList.remove('active'));
+            if (mode === 'volume') {
+                document.getElementById('app-calc-volume').style.display = 'block';
+                document.querySelector('#graph3d-mode .sub-tabs .sub-tab:first-child').classList.add('active');
+                updateVolumePreview();
+            } else if (mode === 'surface') {
+                document.getElementById('app-calc-surface').style.display = 'block';
+                document.querySelector('#graph3d-mode .sub-tabs .sub-tab:nth-child(2)').classList.add('active');
+            } else {
+                document.getElementById('app-calc-solid').style.display = 'block';
+                document.querySelector('#graph3d-mode .sub-tabs .sub-tab:last-child').classList.add('active');
+            }
         }
 
-        // Khoảng cách
+        // ========== HÀM TOÁN HỌC ==========
+        function vectorCross(a, b) { return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+        function vectorNorm(v) { return Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]); }
+        function scalarTriple(a,b,c) { const cross = vectorCross(a,b); return cross[0]*c[0]+cross[1]*c[1]+cross[2]*c[2]; }
+
+        // ========== KHOẢNG CÁCH ==========
         function updateDistanceInputs() {
             const type1 = document.getElementById('obj1-type').value;
             const type2 = document.getElementById('obj2-type').value;
             renderDistanceInput('obj1-inputs', type1, '1');
             renderDistanceInput('obj2-inputs', type2, '2');
         }
-
         function renderDistanceInput(containerId, type, suffix) {
             const container = document.getElementById(containerId);
-            if (type === 'point') {
-                container.innerHTML = `<div class="coord-input"><input type="number" id="point${suffix}x" placeholder="x" value="0" step="0.1"><input type="number" id="point${suffix}y" placeholder="y" value="0" step="0.1"><input type="number" id="point${suffix}z" placeholder="z" value="0" step="0.1"></div>`;
-            } else if (type === 'line') {
-                container.innerHTML = `<div class="line-input"><input type="number" id="line${suffix}Ax" placeholder="A.x" value="0"><input type="number" id="line${suffix}Ay" placeholder="A.y" value="0"><input type="number" id="line${suffix}Az" placeholder="A.z" value="0"><input type="number" id="line${suffix}ux" placeholder="u.x" value="1"><input type="number" id="line${suffix}uy" placeholder="u.y" value="0"><input type="number" id="line${suffix}uz" placeholder="u.z" value="0"></div>`;
-            } else if (type === 'plane') {
-                container.innerHTML = `<div class="plane-input"><input type="number" id="plane${suffix}a" placeholder="a" value="1"><input type="number" id="plane${suffix}b" placeholder="b" value="0"><input type="number" id="plane${suffix}c" placeholder="c" value="0"><input type="number" id="plane${suffix}d" placeholder="d" value="0"></div>`;
-            }
+            if (type === 'point') container.innerHTML = `<div class="coord-input"><input type="number" id="point${suffix}x" value="0"><input id="point${suffix}y" value="0"><input id="point${suffix}z" value="0"></div>`;
+            else if (type === 'line') container.innerHTML = `<div class="line-input"><input id="line${suffix}Ax" value="0"><input id="line${suffix}Ay" value="0"><input id="line${suffix}Az" value="0"><input id="line${suffix}ux" value="1"><input id="line${suffix}uy" value="0"><input id="line${suffix}uz" value="0"></div>`;
+            else container.innerHTML = `<div class="plane-input"><input id="plane${suffix}a" value="1"><input id="plane${suffix}b" value="0"><input id="plane${suffix}c" value="0"><input id="plane${suffix}d" value="0"></div>`;
         }
-
-        function getPoint(suffix) {
-            return [parseFloat(document.getElementById(`point${suffix}x`)?.value || 0), parseFloat(document.getElementById(`point${suffix}y`)?.value || 0), parseFloat(document.getElementById(`point${suffix}z`)?.value || 0)];
-        }
-
-        function getLine(suffix) {
-            return { A: [parseFloat(document.getElementById(`line${suffix}Ax`)?.value || 0), parseFloat(document.getElementById(`line${suffix}Ay`)?.value || 0), parseFloat(document.getElementById(`line${suffix}Az`)?.value || 0)], u: [parseFloat(document.getElementById(`line${suffix}ux`)?.value || 0), parseFloat(document.getElementById(`line${suffix}uy`)?.value || 0), parseFloat(document.getElementById(`line${suffix}uz`)?.value || 0)] };
-        }
-
-        function getPlane(suffix) {
-            return { a: parseFloat(document.getElementById(`plane${suffix}a`)?.value || 0), b: parseFloat(document.getElementById(`plane${suffix}b`)?.value || 0), c: parseFloat(document.getElementById(`plane${suffix}c`)?.value || 0), d: parseFloat(document.getElementById(`plane${suffix}d`)?.value || 0) };
-        }
-
+        function getPoint(s) { return [parseFloat(document.getElementById(`point${s}x`)?.value||0), parseFloat(document.getElementById(`point${s}y`)?.value||0), parseFloat(document.getElementById(`point${s}z`)?.value||0)]; }
+        function getLine(s) { return { A: [parseFloat(document.getElementById(`line${s}Ax`)?.value||0), parseFloat(document.getElementById(`line${s}Ay`)?.value||0), parseFloat(document.getElementById(`line${s}Az`)?.value||0)], u: [parseFloat(document.getElementById(`line${s}ux`)?.value||0), parseFloat(document.getElementById(`line${s}uy`)?.value||0), parseFloat(document.getElementById(`line${s}uz`)?.value||0)] }; }
+        function getPlane(s) { return { a: parseFloat(document.getElementById(`plane${s}a`)?.value||0), b: parseFloat(document.getElementById(`plane${s}b`)?.value||0), c: parseFloat(document.getElementById(`plane${s}c`)?.value||0), d: parseFloat(document.getElementById(`plane${s}d`)?.value||0) }; }
         function calculateDistance() {
-            const type1 = document.getElementById('obj1-type').value;
-            const type2 = document.getElementById('obj2-type').value;
-            let distance = 0, steps = [];
-            if (type1 === 'point' && type2 === 'point') {
-                const P = getPoint('1'), Q = getPoint('2');
-                const dx = P[0]-Q[0], dy = P[1]-Q[1], dz = P[2]-Q[2];
-                distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
-                steps = [`A(${P[0]},${P[1]},${P[2]}), B(${Q[0]},${Q[1]},${Q[2]})`, `d = ${distance.toFixed(8)}`];
-            } else if ((type1 === 'point' && type2 === 'plane') || (type1 === 'plane' && type2 === 'point')) {
-                const isFirstPoint = type1 === 'point';
-                const M = isFirstPoint ? getPoint('1') : getPoint('2');
-                const pl = isFirstPoint ? getPlane('2') : getPlane('1');
-                const numerator = Math.abs(pl.a*M[0] + pl.b*M[1] + pl.c*M[2] + pl.d);
-                const denominator = Math.sqrt(pl.a*pl.a + pl.b*pl.b + pl.c*pl.c);
-                distance = numerator / denominator;
-                steps = [`d = ${distance.toFixed(8)}`];
-            } else if ((type1 === 'point' && type2 === 'line') || (type1 === 'line' && type2 === 'point')) {
-                const isFirstPoint = type1 === 'point';
-                const M = isFirstPoint ? getPoint('1') : getPoint('2');
-                const line = isFirstPoint ? getLine('2') : getLine('1');
+            const t1 = document.getElementById('obj1-type').value, t2 = document.getElementById('obj2-type').value;
+            let d = 0, steps = [];
+            if (t1 === 'point' && t2 === 'point') { const P=getPoint('1'), Q=getPoint('2'); d = Math.hypot(P[0]-Q[0], P[1]-Q[1], P[2]-Q[2]); steps = [`d = ${d.toFixed(6)}`]; }
+            else if ((t1==='point' && t2==='plane') || (t1==='plane' && t2==='point')) {
+                const isFirst = t1==='point', M = isFirst ? getPoint('1') : getPoint('2'), pl = isFirst ? getPlane('2') : getPlane('1');
+                d = Math.abs(pl.a*M[0]+pl.b*M[1]+pl.c*M[2]+pl.d) / Math.hypot(pl.a,pl.b,pl.c);
+                steps = [`d = ${d.toFixed(6)}`];
+            } else if ((t1==='point' && t2==='line') || (t1==='line' && t2==='point')) {
+                const isFirst = t1==='point', M = isFirst ? getPoint('1') : getPoint('2'), line = isFirst ? getLine('2') : getLine('1');
                 const AM = [M[0]-line.A[0], M[1]-line.A[1], M[2]-line.A[2]];
-                const cross = vectorCross(AM, line.u);
-                const numerator = vectorNorm(cross);
-                const denominator = vectorNorm(line.u);
-                distance = numerator / denominator;
-                steps = [`d = ${distance.toFixed(8)}`];
-            } else if (type1 === 'line' && type2 === 'line') {
-                const d1 = getLine('1'), d2 = getLine('2');
-                const AB = [d2.A[0]-d1.A[0], d2.A[1]-d1.A[1], d2.A[2]-d1.A[2]];
-                const cross = vectorCross(d1.u, d2.u);
-                const numerator = Math.abs(scalarTriple(AB, d1.u, d2.u));
-                const denominator = vectorNorm(cross);
-                distance = denominator < 1e-9 ? 0 : numerator / denominator;
-                steps = [`d = ${distance.toFixed(8)}`];
-            } else if ((type1 === 'line' && type2 === 'plane') || (type1 === 'plane' && type2 === 'line')) {
-                const isFirstLine = type1 === 'line';
-                const line = isFirstLine ? getLine('1') : getLine('2');
-                const pl = isFirstLine ? getPlane('2') : getPlane('1');
-                const dot = scalarTriple(line.u, [pl.a, pl.b, pl.c], [0,0,0]);
-                if (Math.abs(dot) > 1e-9) distance = 0;
-                else {
-                    const numerator = Math.abs(pl.a*line.A[0] + pl.b*line.A[1] + pl.c*line.A[2] + pl.d);
-                    const denominator = Math.sqrt(pl.a*pl.a + pl.b*pl.b + pl.c*pl.c);
-                    distance = numerator / denominator;
-                }
-                steps = [`d = ${distance.toFixed(8)}`];
-            } else if (type1 === 'plane' && type2 === 'plane') {
-                const p1 = getPlane('1'), p2 = getPlane('2');
-                const denominator = Math.sqrt(p1.a*p1.a + p1.b*p1.b + p1.c*p1.c);
-                distance = Math.abs(p2.d - p1.d) / denominator;
-                steps = [`d = ${distance.toFixed(8)}`];
+                d = vectorNorm(vectorCross(AM, line.u)) / vectorNorm(line.u);
+                steps = [`d = ${d.toFixed(6)}`];
+            } else if (t1 === 'line' && t2 === 'line') {
+                const d1=getLine('1'), d2=getLine('2'), AB=[d2.A[0]-d1.A[0], d2.A[1]-d1.A[1], d2.A[2]-d1.A[2]], cross=vectorCross(d1.u,d2.u), denom=vectorNorm(cross);
+                d = denom<1e-9 ? 0 : Math.abs(scalarTriple(AB,d1.u,d2.u))/denom;
+                steps = [`d = ${d.toFixed(6)}`];
+            } else if ((t1==='line' && t2==='plane') || (t1==='plane' && t2==='line')) {
+                const isFirst = t1==='line', line = isFirst ? getLine('1') : getLine('2'), pl = isFirst ? getPlane('2') : getPlane('1');
+                const dot = line.u[0]*pl.a + line.u[1]*pl.b + line.u[2]*pl.c;
+                if (Math.abs(dot) > 1e-9) d = 0;
+                else d = Math.abs(pl.a*line.A[0]+pl.b*line.A[1]+pl.c*line.A[2]+pl.d) / Math.hypot(pl.a,pl.b,pl.c);
+                steps = [`d = ${d.toFixed(6)}`];
+            } else if (t1 === 'plane' && t2 === 'plane') {
+                const p1=getPlane('1'), p2=getPlane('2');
+                d = Math.abs(p2.d - p1.d) / Math.hypot(p1.a,p1.b,p1.c);
+                steps = [`d = ${d.toFixed(6)}`];
             }
-            document.getElementById('dist-value').innerHTML = distance.toFixed(8);
+            document.getElementById('dist-value').innerHTML = d.toFixed(8);
             document.getElementById('dist-result').style.display = 'block';
             document.getElementById('dist-steps').style.display = 'block';
-            document.getElementById('dist-steps-container').innerHTML = steps.map((s, i) => `<div class="step-card"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-formula">${s}</div></div></div>`).join('');
+            document.getElementById('dist-steps-container').innerHTML = steps.map((s,i)=>`<div class="step-card"><div class="step-num">${i+1}</div><div class="step-body"><div class="step-formula">${s}</div></div></div>`).join('');
         }
+        function copyDistanceSolution() { const steps = document.getElementById('dist-steps-container').innerText; navigator.clipboard.writeText("=== KHOẢNG CÁCH ===\n"+steps); }
 
-        function copyDistanceSolution() {
-            const steps = document.getElementById('dist-steps-container').innerText;
-            navigator.clipboard.writeText("=== LỜI GIẢI KHOẢNG CÁCH ===\n" + steps);
-            const btn = document.querySelector('#dist-steps .copy-sol-btn');
-            btn.textContent = '✅ Đã Copy!';
-            setTimeout(() => btn.textContent = '📋 Copy', 2000);
-        }
-
-        // Góc
+        // ========== GÓC ==========
         function updateAngleInputs() {
             const type = document.getElementById('angle-type').value;
             const container = document.getElementById('angle-inputs');
-            if (type === 'vector-vector') {
-                container.innerHTML = `<div class="select-group"><label>🔹 Vector u</label><div class="coord-input"><input type="number" id="vec1x" value="1"><input type="number" id="vec1y" value="0"><input type="number" id="vec1z" value="0"></div><label>🔹 Vector v</label><div class="coord-input"><input type="number" id="vec2x" value="0"><input type="number" id="vec2y" value="1"><input type="number" id="vec2z" value="0"></div></div>`;
-            } else if (type === 'line-line') {
-                container.innerHTML = `<div class="select-group"><label>🔹 VTCP u₁</label><div class="coord-input"><input type="number" id="line1ux" value="1"><input type="number" id="line1uy" value="0"><input type="number" id="line1uz" value="0"></div><label>🔹 VTCP u₂</label><div class="coord-input"><input type="number" id="line2vx" value="0"><input type="number" id="line2vy" value="1"><input type="number" id="line2vz" value="0"></div></div>`;
-            } else if (type === 'line-plane') {
-                container.innerHTML = `<div class="select-group"><label>🔹 VTCP u</label><div class="coord-input"><input type="number" id="line-u-x" value="1"><input type="number" id="line-u-y" value="0"><input type="number" id="line-u-z" value="0"></div><label>🔹 VTPT n</label><div class="coord-input"><input type="number" id="plane-n-a" value="1"><input type="number" id="plane-n-b" value="0"><input type="number" id="plane-n-c" value="0"></div></div>`;
-            } else if (type === 'plane-plane') {
-                container.innerHTML = `<div class="select-group"><label>🔹 VTPT n₁</label><div class="coord-input"><input type="number" id="plane1-a" value="1"><input type="number" id="plane1-b" value="0"><input type="number" id="plane1-c" value="0"></div><label>🔹 VTPT n₂</label><div class="coord-input"><input type="number" id="plane2-a" value="0"><input type="number" id="plane2-b" value="1"><input type="number" id="plane2-c" value="0"></div></div>`;
-            }
+            if (type === 'vector-vector') container.innerHTML = `<div class="select-group"><label>Vector u</label><div class="coord-input"><input id="vec1x" value="1"><input id="vec1y" value="0"><input id="vec1z" value="0"></div><label>Vector v</label><div class="coord-input"><input id="vec2x" value="0"><input id="vec2y" value="1"><input id="vec2z" value="0"></div></div>`;
+            else if (type === 'line-line') container.innerHTML = `<div class="select-group"><label>VTCP u₁</label><div class="coord-input"><input id="line1ux" value="1"><input id="line1uy" value="0"><input id="line1uz" value="0"></div><label>VTCP u₂</label><div class="coord-input"><input id="line2vx" value="0"><input id="line2vy" value="1"><input id="line2vz" value="0"></div></div>`;
+            else if (type === 'line-plane') container.innerHTML = `<div class="select-group"><label>VTCP u</label><div class="coord-input"><input id="line-u-x" value="1"><input id="line-u-y" value="0"><input id="line-u-z" value="0"></div><label>VTPT n</label><div class="coord-input"><input id="plane-n-a" value="1"><input id="plane-n-b" value="0"><input id="plane-n-c" value="0"></div></div>`;
+            else container.innerHTML = `<div class="select-group"><label>VTPT n₁</label><div class="coord-input"><input id="plane1-a" value="1"><input id="plane1-b" value="0"><input id="plane1-c" value="0"></div><label>VTPT n₂</label><div class="coord-input"><input id="plane2-a" value="0"><input id="plane2-b" value="1"><input id="plane2-c" value="0"></div></div>`;
         }
-
+        function setAngleUnit(unit) { currentAngleUnit = unit; document.querySelectorAll('.angle-btn').forEach(btn=>btn.classList.remove('active')); event.target.classList.add('active'); if(document.getElementById('angle-result').style.display==='block') calculateAngle(); }
         function calculateAngle() {
             const type = document.getElementById('angle-type').value;
-            let angleRad = 0;
-            if (type === 'vector-vector') {
-                const u = [parseFloat(document.getElementById('vec1x').value), parseFloat(document.getElementById('vec1y').value), parseFloat(document.getElementById('vec1z').value)];
-                const v = [parseFloat(document.getElementById('vec2x').value), parseFloat(document.getElementById('vec2y').value), parseFloat(document.getElementById('vec2z').value)];
-                const dot = u[0]*v[0] + u[1]*v[1] + u[2]*v[2];
-                const lenU = vectorNorm(u);
-                const lenV = vectorNorm(v);
-                angleRad = Math.acos(Math.min(1, Math.max(-1, dot/(lenU*lenV))));
-            } else if (type === 'line-line') {
-                const u = [parseFloat(document.getElementById('line1ux').value), parseFloat(document.getElementById('line1uy').value), parseFloat(document.getElementById('line1uz').value)];
-                const v = [parseFloat(document.getElementById('line2vx').value), parseFloat(document.getElementById('line2vy').value), parseFloat(document.getElementById('line2vz').value)];
-                const dot = u[0]*v[0] + u[1]*v[1] + u[2]*v[2];
-                const lenU = vectorNorm(u);
-                const lenV = vectorNorm(v);
-                angleRad = Math.acos(Math.min(1, Math.abs(dot)/(lenU*lenV)));
-            } else if (type === 'line-plane') {
-                const u = [parseFloat(document.getElementById('line-u-x').value), parseFloat(document.getElementById('line-u-y').value), parseFloat(document.getElementById('line-u-z').value)];
-                const n = [parseFloat(document.getElementById('plane-n-a').value), parseFloat(document.getElementById('plane-n-b').value), parseFloat(document.getElementById('plane-n-c').value)];
-                const dot = Math.abs(u[0]*n[0] + u[1]*n[1] + u[2]*n[2]);
-                const lenU = vectorNorm(u);
-                const lenN = vectorNorm(n);
-                angleRad = Math.asin(Math.min(1, dot/(lenU*lenN)));
-            } else if (type === 'plane-plane') {
-                const n1 = [parseFloat(document.getElementById('plane1-a').value), parseFloat(document.getElementById('plane1-b').value), parseFloat(document.getElementById('plane1-c').value)];
-                const n2 = [parseFloat(document.getElementById('plane2-a').value), parseFloat(document.getElementById('plane2-b').value), parseFloat(document.getElementById('plane2-c').value)];
-                const dot = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-                const len1 = vectorNorm(n1);
-                const len2 = vectorNorm(n2);
-                angleRad = Math.acos(Math.min(1, Math.abs(dot)/(len1*len2)));
+            let rad = 0;
+            if (type==='vector-vector') {
+                const u=[parseFloat(document.getElementById('vec1x').value),parseFloat(document.getElementById('vec1y').value),parseFloat(document.getElementById('vec1z').value)];
+                const v=[parseFloat(document.getElementById('vec2x').value),parseFloat(document.getElementById('vec2y').value),parseFloat(document.getElementById('vec2z').value)];
+                rad = Math.acos(Math.min(1,Math.max(-1,(u[0]*v[0]+u[1]*v[1]+u[2]*v[2])/(vectorNorm(u)*vectorNorm(v)))));
+            } else if (type==='line-line') {
+                const u=[parseFloat(document.getElementById('line1ux').value),parseFloat(document.getElementById('line1uy').value),parseFloat(document.getElementById('line1uz').value)];
+                const v=[parseFloat(document.getElementById('line2vx').value),parseFloat(document.getElementById('line2vy').value),parseFloat(document.getElementById('line2vz').value)];
+                rad = Math.acos(Math.min(1,Math.abs(u[0]*v[0]+u[1]*v[1]+u[2]*v[2])/(vectorNorm(u)*vectorNorm(v))));
+            } else if (type==='line-plane') {
+                const u=[parseFloat(document.getElementById('line-u-x').value),parseFloat(document.getElementById('line-u-y').value),parseFloat(document.getElementById('line-u-z').value)];
+                const n=[parseFloat(document.getElementById('plane-n-a').value),parseFloat(document.getElementById('plane-n-b').value),parseFloat(document.getElementById('plane-n-c').value)];
+                rad = Math.asin(Math.min(1,Math.abs(u[0]*n[0]+u[1]*n[1]+u[2]*n[2])/(vectorNorm(u)*vectorNorm(n))));
+            } else {
+                const n1=[parseFloat(document.getElementById('plane1-a').value),parseFloat(document.getElementById('plane1-b').value),parseFloat(document.getElementById('plane1-c').value)];
+                const n2=[parseFloat(document.getElementById('plane2-a').value),parseFloat(document.getElementById('plane2-b').value),parseFloat(document.getElementById('plane2-c').value)];
+                rad = Math.acos(Math.min(1,Math.abs(n1[0]*n2[0]+n1[1]*n2[1]+n1[2]*n2[2])/(vectorNorm(n1)*vectorNorm(n2))));
             }
-            let result;
-            if (currentAngleUnit === 'degree') result = (angleRad * 180 / Math.PI).toFixed(4) + "°";
-            else if (currentAngleUnit === 'radian') result = angleRad.toFixed(6) + " rad";
-            else if (currentAngleUnit === 'sin') result = Math.sin(angleRad).toFixed(6);
-            else if (currentAngleUnit === 'cos') result = Math.cos(angleRad).toFixed(6);
-            else if (currentAngleUnit === 'tan') result = Math.tan(angleRad).toFixed(6);
-            else result = (angleRad * 180 / Math.PI).toFixed(4) + "°";
+            let result = currentAngleUnit==='degree' ? (rad*180/Math.PI).toFixed(4)+"°" : currentAngleUnit==='radian' ? rad.toFixed(6)+" rad" : currentAngleUnit==='sin' ? Math.sin(rad).toFixed(6) : currentAngleUnit==='cos' ? Math.cos(rad).toFixed(6) : currentAngleUnit==='tan' ? Math.tan(rad).toFixed(6) : (1/Math.tan(rad)).toFixed(6);
             document.getElementById('angle-value').innerHTML = result;
             document.getElementById('angle-result').style.display = 'block';
             document.getElementById('angle-steps').style.display = 'block';
-            document.getElementById('angle-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">Kết quả: φ = ${result}</div></div></div>`;
+            document.getElementById('angle-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">Góc = ${result}</div></div></div>`;
+        }
+        function copyAngleSolution() { const steps = document.getElementById('angle-steps-container').innerText; navigator.clipboard.writeText("=== GÓC ===\n"+steps); }
+
+        // ========== ĐA GIÁC ==========
+        function updateVertexLabels(cId) { document.querySelectorAll(`#${cId} .vertex-row`).forEach((r,i)=>{ r.querySelector('.vertex-label').textContent = String.fromCharCode(65+i)+(i>=26?i+1:''); }); }
+        function addVertex(type) {
+            const cId = type==='area'?'area-vertices-container':'volume-vertices-container';
+            const idx = document.getElementById(cId).children.length;
+            const div = document.createElement('div'); div.className='vertex-row';
+            div.innerHTML = `<span class="vertex-label">${String.fromCharCode(65+idx)}</span><div class="coord-group"><input type="number" class="coord-x" value="0"><input type="number" class="coord-y" value="0"><input type="number" class="coord-z" value="0"></div><button class="del-vertex" onclick="removeVertex('${type}', this)">🗑️</button>`;
+            document.getElementById(cId).appendChild(div);
+            updateVertexLabels(cId);
+        }
+        function removeVertex(type, btn) {
+            const cId = type==='area'?'area-vertices-container':'volume-vertices-container';
+            if(document.getElementById(cId).children.length <= (type==='area'?3:4)) { alert(`Cần ít nhất ${type==='area'?3:4} đỉnh!`); return; }
+            btn.closest('.vertex-row').remove();
+            updateVertexLabels(cId);
+        }
+        function getVertices(cId) { const v=[]; document.querySelectorAll(`#${cId} .vertex-row`).forEach(r=>{ v.push([parseFloat(r.querySelector('.coord-x').value||0), parseFloat(r.querySelector('.coord-y').value||0), parseFloat(r.querySelector('.coord-z').value||0)]); }); return v; }
+        function calculatePolygonArea() {
+            const v = getVertices('area-vertices-container');
+            if(v.length<3){ alert('Cần ít nhất 3 đỉnh!'); return; }
+            let sum=[0,0,0];
+            for(let i=0;i<v.length;i++){ const v1=v[i], v2=v[(i+1)%v.length]; sum[0]+=v1[1]*v2[2]-v1[2]*v2[1]; sum[1]+=v1[2]*v2[0]-v1[0]*v2[2]; sum[2]+=v1[0]*v2[1]-v1[1]*v2[0]; }
+            const area = 0.5 * Math.sqrt(sum[0]*sum[0]+sum[1]*sum[1]+sum[2]*sum[2]);
+            document.getElementById('area-value').innerHTML = area.toFixed(8)+" (đvdt)";
+            document.getElementById('area-result').style.display='block';
+            document.getElementById('area-vol-steps').style.display='block';
+            document.getElementById('area-vol-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">Diện tích = ${area.toFixed(8)} đvdt</div></div></div>`;
+        }
+        function calculatePolygonVolume() {
+            const v = getVertices('volume-vertices-container');
+            if(v.length<4){ alert('Cần ít nhất 4 đỉnh!'); return; }
+            let vol=0;
+            if(v.length===4){ const AB=[v[1][0]-v[0][0],v[1][1]-v[0][1],v[1][2]-v[0][2]], AC=[v[2][0]-v[0][0],v[2][1]-v[0][1],v[2][2]-v[0][2]], AD=[v[3][0]-v[0][0],v[3][1]-v[0][1],v[3][2]-v[0][2]]; vol = Math.abs(scalarTriple(AB,AC,AD))/6; }
+            else if(v.length===8){ const AB=[v[1][0]-v[0][0],v[1][1]-v[0][1],v[1][2]-v[0][2]], AC=[v[2][0]-v[0][0],v[2][1]-v[0][1],v[2][2]-v[0][2]], AD=[v[4][0]-v[0][0],v[4][1]-v[0][1],v[4][2]-v[0][2]]; vol = Math.abs(scalarTriple(AB,AC,AD)); }
+            else { let total=0; for(let i=2;i<v.length-1;i++){ const AB=[v[1][0]-v[0][0],v[1][1]-v[0][1],v[1][2]-v[0][2]], AC=[v[i][0]-v[0][0],v[i][1]-v[0][1],v[i][2]-v[0][2]], AD=[v[i+1][0]-v[0][0],v[i+1][1]-v[0][1],v[i+1][2]-v[0][2]]; total += Math.abs(scalarTriple(AB,AC,AD)); } vol = total/6; }
+            document.getElementById('volume-value').innerHTML = vol.toFixed(8)+" (đvtt)";
+            document.getElementById('volume-result').style.display='block';
+            document.getElementById('area-vol-steps').style.display='block';
+            document.getElementById('area-vol-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">Thể tích = ${vol.toFixed(8)} đvtt</div></div></div>`;
+        }
+        function copyAreaVolSolution() { const steps = document.getElementById('area-vol-steps-container').innerText; navigator.clipboard.writeText("=== DT/TT ===\n"+steps); }
+
+        // ========== ĐỒ THỊ 3D ==========
+        function parseFunc(expr, x, y) {
+            try {
+                let f = expr.replace(/sin\(/g,'Math.sin(').replace(/cos\(/g,'Math.cos(').replace(/tan\(/g,'Math.tan(')
+                           .replace(/exp\(/g,'Math.exp(').replace(/log\(/g,'Math.log(').replace(/sqrt\(/g,'Math.sqrt(')
+                           .replace(/\^/g,'**');
+                return Function('x','y','return '+f)(x,y);
+            } catch(e){ return 0; }
         }
 
-        function copyAngleSolution() {
-            const steps = document.getElementById('angle-steps-container').innerText;
-            navigator.clipboard.writeText("=== LỜI GIẢI GÓC ===\n" + steps);
-            const btn = document.querySelector('#angle-steps .copy-sol-btn');
-            btn.textContent = '✅ Đã Copy!';
-            setTimeout(() => btn.textContent = '📋 Copy', 2000);
+        function init3D() {
+            const container = document.getElementById('canvas3d');
+            const width = container.clientWidth, height = 450;
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x020617);
+            camera = new THREE.PerspectiveCamera(45, width/height, 0.1, 1000);
+            camera.position.set(8, 6, 10);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            container.innerHTML = ''; container.appendChild(renderer.domElement);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            const ambient = new THREE.AmbientLight(0x404060); scene.add(ambient);
+            const light = new THREE.DirectionalLight(0xffffff, 1); light.position.set(5,10,7); scene.add(light);
+            const grid = new THREE.GridHelper(20, 20, 0x00f2ff, 0x336699); grid.position.y = -2; scene.add(grid);
+            const axes = new THREE.AxesHelper(5); scene.add(axes);
+            animate();
         }
 
-        function toggleCS() {
-            const sidebar = document.getElementById('cs-sidebar');
-            const overlay = document.getElementById('cs-overlay');
-            const isOpen = sidebar.classList.toggle('open');
-            if (overlay) overlay.classList.toggle('visible', isOpen);
-            document.body.style.overflow = isOpen ? 'hidden' : '';
+        function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+
+        function updateGraph() {
+            meshes.forEach(m => scene.remove(m)); meshes = [];
+            const xmin=parseFloat(document.getElementById('xmin').value), xmax=parseFloat(document.getElementById('xmax').value);
+            const ymin=parseFloat(document.getElementById('ymin').value), ymax=parseFloat(document.getElementById('ymax').value);
+            const grid=parseInt(document.getElementById('gridSize').value);
+            const opacity=parseFloat(document.getElementById('opacity').value);
+            const items = document.querySelectorAll('#function-list .func-item');
+            appFunctions = [];
+            items.forEach((item, idx) => {
+                const expr = item.querySelector('.func-expr').value;
+                if(!expr) return;
+                const color = item.querySelector('.func-color').style.backgroundColor;
+                const stepX=(xmax-xmin)/grid, stepY=(ymax-ymin)/grid;
+                const vertices=[], indices=[];
+                for(let i=0;i<=grid;i++) for(let j=0;j<=grid;j++){ const x=xmin+i*stepX, y=ymin+j*stepY; let z=parseFunc(expr,x,y); if(isNaN(z)||!isFinite(z)) z=0; vertices.push(x, z, y); }
+                for(let i=0;i<grid;i++) for(let j=0;j<grid;j++){ const id=i*(grid+1)+j; indices.push(id, id+1, id+grid+1, id+1, id+grid+2, id+grid+1); }
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+                geometry.setIndex(indices);
+                geometry.computeVertexNormals();
+                const material = new THREE.MeshPhongMaterial({ color: color, side: THREE.DoubleSide, transparent: true, opacity: opacity });
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh); meshes.push(mesh);
+                appFunctions.push({ expr, color });
+            });
+            updateFunctionSelects();
+            updateVolumePreview();
         }
 
-        function toggleSection(id) {
-            const sec = document.getElementById(id);
-            if (sec) sec.classList.toggle('collapsed');
+        function updateFunctionSelects() {
+            const options = [];
+            document.querySelectorAll('#function-list .func-item').forEach((item, idx) => {
+                const expr = item.querySelector('.func-expr').value;
+                if(expr) options.push(`<option value="${idx}">z = ${expr}</option>`);
+            });
+            document.getElementById('volume-func-select').innerHTML = options;
+            document.getElementById('surface-func-select').innerHTML = options;
+            document.getElementById('solid-top-func').innerHTML = options;
+            document.getElementById('solid-bottom-func').innerHTML = options;
+            if(options.length >= 2) document.getElementById('solid-bottom-func').value = "1";
         }
 
-        // Khởi tạo
+        function updateVolumePreview() {
+            const idx = parseInt(document.getElementById('volume-func-select').value);
+            const item = document.querySelectorAll('#function-list .func-item')[idx];
+            if(!item) return;
+            const expr = item.querySelector('.func-expr').value;
+            const xmin=parseFloat(document.getElementById('vol-xmin').value), xmax=parseFloat(document.getElementById('vol-xmax').value);
+            const ymin=parseFloat(document.getElementById('vol-ymin').value), ymax=parseFloat(document.getElementById('vol-ymax').value);
+            const nx=30, ny=30;
+            const dx=(xmax-xmin)/nx, dy=(ymax-ymin)/ny;
+            let sum=0;
+            for(let i=0;i<=nx;i++) for(let j=0;j<=ny;j++){ const x=xmin+i*dx, y=ymin+j*dy; let val=parseFunc(expr,x,y); if(!isNaN(val)&&isFinite(val)){ let w=1; if(i===0||i===nx) w*=0.5; if(j===0||j===ny) w*=0.5; sum+=val*w; } }
+            const vol = sum * dx * dy;
+            document.getElementById('volume-preview-value').innerHTML = vol.toFixed(6) + " (đvtt)";
+            document.getElementById('volume-preview').style.display = 'block';
+        }
+
+        function doubleIntegral(expr, xmin, xmax, ymin, ymax, nx=50, ny=50) {
+            const dx=(xmax-xmin)/nx, dy=(ymax-ymin)/ny; let sum=0;
+            for(let i=0;i<=nx;i++) for(let j=0;j<=ny;j++){ const x=xmin+i*dx, y=ymin+j*dy; let val=parseFunc(expr,x,y); if(isNaN(val)||!isFinite(val)) val=0; let w=1; if(i===0||i===nx) w*=0.5; if(j===0||j===ny) w*=0.5; sum+=val*w; }
+            return sum * dx * dy;
+        }
+
+        function calculateVolumeUnder() {
+            const idx = parseInt(document.getElementById('volume-func-select').value);
+            const item = document.querySelectorAll('#function-list .func-item')[idx];
+            if(!item){ alert('Chọn hàm!'); return; }
+            const expr = item.querySelector('.func-expr').value;
+            const xmin=parseFloat(document.getElementById('vol-xmin').value), xmax=parseFloat(document.getElementById('vol-xmax').value);
+            const ymin=parseFloat(document.getElementById('vol-ymin').value), ymax=parseFloat(document.getElementById('vol-ymax').value);
+            const vol = doubleIntegral(expr, xmin, xmax, ymin, ymax);
+            document.getElementById('app-result-value').innerHTML = vol.toFixed(8) + " (đvtt)";
+            document.getElementById('app-result').style.display = 'block';
+            document.getElementById('app-steps').style.display = 'block';
+            document.getElementById('app-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">V = ∬ ${expr} dxdy = ${vol.toFixed(8)} (đvtt)</div></div></div>`;
+        }
+
+        function calculateSurfaceArea() {
+            const idx = parseInt(document.getElementById('surface-func-select').value);
+            const item = document.querySelectorAll('#function-list .func-item')[idx];
+            if(!item){ alert('Chọn hàm!'); return; }
+            const expr = item.querySelector('.func-expr').value;
+            const xmin=parseFloat(document.getElementById('surf-xmin').value), xmax=parseFloat(document.getElementById('surf-xmax').value);
+            const ymin=parseFloat(document.getElementById('surf-ymin').value), ymax=parseFloat(document.getElementById('surf-ymax').value);
+            const nx=50, ny=50;
+            const dx=(xmax-xmin)/nx, dy=(ymax-ymin)/ny;
+            let sum=0;
+            for(let i=0;i<=nx;i++) for(let j=0;j<=ny;j++){
+                const x=xmin+i*dx, y=ymin+j*dy;
+                const zx = (parseFunc(expr, x+0.01, y) - parseFunc(expr, x-0.01, y)) / 0.02;
+                const zy = (parseFunc(expr, x, y+0.01) - parseFunc(expr, x, y-0.01)) / 0.02;
+                const val = Math.sqrt(1 + zx*zx + zy*zy);
+                let w=1; if(i===0||i===nx) w*=0.5; if(j===0||j===ny) w*=0.5;
+                sum += val * w;
+            }
+            const area = sum * dx * dy;
+            document.getElementById('app-result-value').innerHTML = area.toFixed(8) + " (đvdt)";
+            document.getElementById('app-result').style.display = 'block';
+            document.getElementById('app-steps').style.display = 'block';
+            document.getElementById('app-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">S = ∬√(1+z_x²+z_y²) dxdy = ${area.toFixed(8)} (đvdt)</div></div></div>`;
+        }
+
+        function calculateSolidVolume() {
+            const topIdx = parseInt(document.getElementById('solid-top-func').value);
+            const bottomIdx = parseInt(document.getElementById('solid-bottom-func').value);
+            const topItem = document.querySelectorAll('#function-list .func-item')[topIdx];
+            const bottomItem = document.querySelectorAll('#function-list .func-item')[bottomIdx];
+            if(!topItem || !bottomItem){ alert('Chọn 2 hàm!'); return; }
+            const topExpr = topItem.querySelector('.func-expr').value;
+            const bottomExpr = bottomItem.querySelector('.func-expr').value;
+            const xmin=parseFloat(document.getElementById('solid-xmin').value), xmax=parseFloat(document.getElementById('solid-xmax').value);
+            const ymin=parseFloat(document.getElementById('solid-ymin').value), ymax=parseFloat(document.getElementById('solid-ymax').value);
+            const nx=50, ny=50;
+            const dx=(xmax-xmin)/nx, dy=(ymax-ymin)/ny;
+            let sum=0;
+            for(let i=0;i<=nx;i++) for(let j=0;j<=ny;j++){
+                const x=xmin+i*dx, y=ymin+j*dy;
+                const top = parseFunc(topExpr, x, y);
+                const bottom = parseFunc(bottomExpr, x, y);
+                const val = Math.max(0, top - bottom);
+                let w=1; if(i===0||i===nx) w*=0.5; if(j===0||j===ny) w*=0.5;
+                sum += val * w;
+            }
+            const vol = sum * dx * dy;
+            document.getElementById('app-result-value').innerHTML = vol.toFixed(8) + " (đvtt)";
+            document.getElementById('app-result').style.display = 'block';
+            document.getElementById('app-steps').style.display = 'block';
+            document.getElementById('app-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">V = ∬(${topExpr} - ${bottomExpr}) dxdy = ${vol.toFixed(8)} (đvtt)</div></div></div>`;
+        }
+
+        function copyAppSolution() { const steps = document.getElementById('app-steps-container').innerText; navigator.clipboard.writeText("=== ỨNG DỤNG ĐỒ THỊ ===\n"+steps); }
+
+        function addFunction() {
+            const container = document.getElementById('function-list');
+            const colors = ['#00f2ff','#10b981','#ffe500','#ff2d78','#bf5fff','#fb923c'];
+            const idx = container.children.length;
+            const div = document.createElement('div'); div.className='func-item';
+            div.innerHTML = `<span style="color:${colors[idx%colors.length]};">z${idx+1} =</span><input type="text" class="func-expr" value="0" oninput="updateGraph()"><div class="func-color" style="background:${colors[idx%colors.length]};" onclick="changeColor(this)"></div><button class="btn-small" onclick="removeFunction(this)">✖</button>`;
+            container.appendChild(div);
+            updateGraph();
+        }
+        function removeFunction(btn) { if(document.querySelectorAll('#function-list .func-item').length<=1){ alert('Cần ít nhất 1 hàm!'); return; } btn.closest('.func-item').remove(); updateGraph(); }
+        function changeColor(el) { const colors=['#00f2ff','#10b981','#ffe500','#ff2d78','#bf5fff','#fb923c']; const cur=el.style.backgroundColor; let next=(colors.indexOf(cur)+1)%colors.length; if(next===-1) next=0; el.style.backgroundColor=colors[next]; updateGraph(); }
+        function resetGraph() { document.getElementById('function-list').innerHTML = `<div class="func-item"><span style="color:#00f2ff;">z₁ =</span><input type="text" class="func-expr" value="sin(x)*cos(y)" oninput="updateGraph()"><div class="func-color" style="background:#00f2ff;" onclick="changeColor(this)"></div><button class="btn-small" onclick="removeFunction(this)">✖</button></div>`; updateGraph(); }
+
+        function toggleCS() { const s=document.getElementById('cs-sidebar'), o=document.getElementById('cs-overlay'); const isOpen=s.classList.toggle('open'); if(o) o.classList.toggle('visible',isOpen); document.body.style.overflow=isOpen?'hidden':''; }
+        function toggleSection(id) { const sec = document.getElementById(id); if(sec) sec.classList.toggle('collapsed'); }
+
         updateDistanceInputs();
         updateAngleInputs();
-            const openTab = sessionStorage.getItem('openTab');
-    if (openTab) {
-        sessionStorage.removeItem('openTab');
-        if (typeof setMode === 'function') {
-            setTimeout(() => {
-                if (openTab === 'distance') setMode('distance');
-                else if (openTab === 'angle') setMode('angle');
-                else if (openTab === 'area-volume') setMode('area-volume');
-            }, 100);
-        }
-    }
-
+        setTimeout(() => { init3D(); updateGraph(); }, 100);
     </script>
 </body>
 </html>
