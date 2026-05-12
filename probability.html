@@ -838,9 +838,213 @@
     <!-- CHEAT SHEET -->
     <button class="cs-toggle-btn" onclick="toggleCS()"><span class="cs-icon">📐</span>CÔNG THỨC</button>
     <div class="cs-overlay" id="cs-overlay" onclick="toggleCS()"></div>
-    <div class="cs-sidebar" id="cs-sidebar"><div class="cs-header"><h3>📐 CHEAT SHEET</h3><button class="cs-close" onclick="toggleCS()">✕</button></div>
-        <div class="cs-section"><div class="cs-section-header c-blue">🔵 XÁC SUẤT</div><div class="cs-section-body">...</div></div>
-        <div class="cs-section"><div class="cs-section-header c-green">🟢 THỐNG KÊ</div><div class="cs-section-body">...</div></div>
+    <div class="cs-sidebar" id="cs-sidebar">
+        <div class="cs-header"><h3>📐 CHEAT SHEET — XÁC SUẤT</h3><button class="cs-close" onclick="toggleCS()">✕</button></div>
+
+        <!-- 1. XÁC SUẤT CƠ BẢN -->
+        <div class="cs-section" id="cs-basic">
+            <div class="cs-section-header c-blue" onclick="toggleSection('cs-basic')">🔵 XÁC SUẤT CƠ BẢN <span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula">
+                    <div class="cs-f-name">Xác suất cổ điển</div>
+                    <div class="cs-f-math">\(P(A) = \dfrac{n(A)}{n(\Omega)}\)</div>
+                    <div class="cs-f-note">n(A): số kết quả thuận lợi, n(Ω): tổng số kết quả</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Biến cố bù</div>
+                    <div class="cs-f-math">\(P(\bar{A}) = 1 - P(A)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Biến cố chắc chắn & bất khả</div>
+                    <div class="cs-f-math">\(P(\Omega) = 1 \quad;\quad P(\emptyset) = 0\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Khoảng giá trị</div>
+                    <div class="cs-f-math">\(0 \leq P(A) \leq 1\)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PHÉP TOÁN BIẾN CỐ -->
+        <div class="cs-section" id="cs-ops">
+            <div class="cs-section-header c-green" onclick="toggleSection('cs-ops')">🟢 PHÉP TOÁN BIẾN CỐ <span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula">
+                    <div class="cs-f-name">Hợp (cộng xác suất)</div>
+                    <div class="cs-f-math">\(P(A \cup B) = P(A) + P(B) - P(A \cap B)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Xung khắc — A∩B = ∅</div>
+                    <div class="cs-f-math">\(P(A \cup B) = P(A) + P(B)\)</div>
+                    <div class="cs-f-note">Khi A và B không thể đồng thời xảy ra</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Giao (nhân xác suất)</div>
+                    <div class="cs-f-math">\(P(A \cap B) = P(A) \cdot P(B|A)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Độc lập — P(A∩B) = P(A)·P(B)</div>
+                    <div class="cs-f-math">\(P(A \cap B) = P(A) \cdot P(B)\)</div>
+                    <div class="cs-f-note">Khi A không ảnh hưởng đến B</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Hiệu xứng (tam giác)</div>
+                    <div class="cs-f-math">\(P(A \triangle B) = P(A) + P(B) - 2P(A \cap B)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Hiệu biến cố</div>
+                    <div class="cs-f-math">\(P(A \setminus B) = P(A) - P(A \cap B)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Bù của hợp (De Morgan)</div>
+                    <div class="cs-f-math">\(P(\overline{A \cup B}) = 1 - P(A \cup B)\)</div>
+                    <div class="cs-f-math">\(P(\bar{A} \cap \bar{B}) = 1 - P(A) - P(B) + P(A \cap B)\)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. XÁC SUẤT CÓ ĐIỀU KIỆN -->
+        <div class="cs-section" id="cs-cond">
+            <div class="cs-section-header c-yellow" onclick="toggleSection('cs-cond')">🟡 XÁC SUẤT CÓ ĐIỀU KIỆN <span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula">
+                    <div class="cs-f-name">Định nghĩa</div>
+                    <div class="cs-f-math">\(P(A|B) = \dfrac{P(A \cap B)}{P(B)}, \quad P(B) > 0\)</div>
+                    <div class="cs-f-note">Xác suất A xảy ra khi biết B đã xảy ra</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Quy tắc nhân (từ đk)</div>
+                    <div class="cs-f-math">\(P(A \cap B) = P(B) \cdot P(A|B) = P(A) \cdot P(B|A)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Kiểm tra độc lập (qua đk)</div>
+                    <div class="cs-f-math">\(P(A|B) = P(A) \;\Leftrightarrow\; A \perp B\)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. XÁC SUẤT TOÀN PHẦN & BAYES -->
+        <div class="cs-section" id="cs-bayes">
+            <div class="cs-section-header c-purple" onclick="toggleSection('cs-bayes')">🟣 TOÀN PHẦN & BAYES <span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula">
+                    <div class="cs-f-name">Phân hoạch không gian mẫu</div>
+                    <div class="cs-f-math">\(H_1, H_2, \ldots, H_n\) đôi một xung khắc,<br>\(H_1 \cup \cdots \cup H_n = \Omega\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Công thức xác suất toàn phần</div>
+                    <div class="cs-f-math">\(P(B) = \sum_{i=1}^{n} P(H_i) \cdot P(B|H_i)\)</div>
+                    <div class="cs-f-note">Trường hợp 2 nhánh (A và Ā):</div>
+                    <div class="cs-f-math">\(P(B) = P(A)P(B|A) + P(\bar{A})P(B|\bar{A})\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Công thức Bayes</div>
+                    <div class="cs-f-math">\(P(H_k|B) = \dfrac{P(H_k) \cdot P(B|H_k)}{P(B)}\)</div>
+                    <div class="cs-f-note">Trường hợp 2 nhánh:</div>
+                    <div class="cs-f-math">\(P(A|B) = \dfrac{P(A) \cdot P(B|A)}{P(A)P(B|A)+P(\bar{A})P(B|\bar{A})}\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Kiểm tra kết quả Bayes</div>
+                    <div class="cs-f-math">\(P(A|B) + P(\bar{A}|B) = 1\)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. TỔ HỢP & CHỈNH HỢP -->
+        <div class="cs-section" id="cs-comb">
+            <div class="cs-section-header c-pink" onclick="toggleSection('cs-comb')">🔴 TỔ HỢP & CHỈNH HỢP <span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula">
+                    <div class="cs-f-name">Hoán vị n phần tử</div>
+                    <div class="cs-f-math">\(P_n = n!\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Chỉnh hợp chập k của n</div>
+                    <div class="cs-f-math">\(A_n^k = \dfrac{n!}{(n-k)!}\)</div>
+                    <div class="cs-f-note">Có quan tâm thứ tự, chọn k từ n phần tử</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Tổ hợp chập k của n</div>
+                    <div class="cs-f-math">\(\binom{n}{k} = C_n^k = \dfrac{n!}{k!(n-k)!}\)</div>
+                    <div class="cs-f-note">Không quan tâm thứ tự</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Tính chất tổ hợp</div>
+                    <div class="cs-f-math">\(C_n^0 = C_n^n = 1 \quad;\quad C_n^k = C_n^{n-k}\)</div>
+                    <div class="cs-f-math">\(C_n^k + C_n^{k+1} = C_{n+1}^{k+1}\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Nhị thức Newton</div>
+                    <div class="cs-f-math">\((a+b)^n = \sum_{k=0}^{n} C_n^k \, a^{n-k} b^k\)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. PHÂN PHỐI XÁC SUẤT -->
+        <div class="cs-section" id="cs-dist">
+            <div class="cs-section-header c-orange" onclick="toggleSection('cs-dist')">🟠 PHÂN PHỐI XÁC SUẤT <span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula">
+                    <div class="cs-f-name">Phân phối Bernoulli (nhị thức)</div>
+                    <div class="cs-f-math">\(P(X=k) = C_n^k \, p^k (1-p)^{n-k}\)</div>
+                    <div class="cs-f-note">n phép thử, mỗi phép xác suất thành công là p</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Kỳ vọng — Phương sai (nhị thức)</div>
+                    <div class="cs-f-math">\(E(X) = np \quad;\quad D(X) = np(1-p)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Kỳ vọng (tổng quát)</div>
+                    <div class="cs-f-math">\(E(X) = \sum x_i \cdot P(X = x_i)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Phương sai (tổng quát)</div>
+                    <div class="cs-f-math">\(D(X) = E(X^2) - [E(X)]^2\)</div>
+                    <div class="cs-f-math">\(= \sum (x_i - \bar{x})^2 \cdot P(X=x_i)\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Độ lệch chuẩn</div>
+                    <div class="cs-f-math">\(\sigma(X) = \sqrt{D(X)}\)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. THỐNG KÊ MÔ TẢ -->
+        <div class="cs-section" id="cs-stats">
+            <div class="cs-section-header c-green" onclick="toggleSection('cs-stats')">🟢 THỐNG KÊ MÔ TẢ <span class="cs-chevron">▼</span></div>
+            <div class="cs-section-body">
+                <div class="cs-formula">
+                    <div class="cs-f-name">Trung bình (số liệu ghép nhóm)</div>
+                    <div class="cs-f-math">\(\bar{x} = \dfrac{\sum x_i \cdot n_i}{\sum n_i}\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Phương sai mẫu</div>
+                    <div class="cs-f-math">\(S^2 = \dfrac{\sum n_i(x_i - \bar{x})^2}{\sum n_i}\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Độ lệch chuẩn mẫu</div>
+                    <div class="cs-f-math">\(S = \sqrt{S^2}\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Khoảng biến thiên</div>
+                    <div class="cs-f-math">\(R = x_{\max} - x_{\min}\)</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Tứ phân vị</div>
+                    <div class="cs-f-math">\(Q_1\): trung vị nửa dưới<br>\(Q_2\): trung vị toàn bộ<br>\(Q_3\): trung vị nửa trên</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Khoảng tứ phân vị</div>
+                    <div class="cs-f-math">\(\Delta Q = Q_3 - Q_1\)</div>
+                    <div class="cs-f-note">Đo mức độ tập trung của 50% giá trị giữa</div>
+                </div>
+                <div class="cs-formula">
+                    <div class="cs-f-name">Phát hiện ngoại lệ (outlier)</div>
+                    <div class="cs-f-math">\(x < Q_1 - 1.5\Delta Q\) hoặc \(x > Q_3 + 1.5\Delta Q\)</div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>
