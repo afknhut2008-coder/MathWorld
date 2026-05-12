@@ -353,10 +353,10 @@
 
             <!-- Main tabs -->
             <div class="mode-tabs">
-                <div class="mode-tab" onclick="setMode('distance')">📏 KHOẢNG CÁCH</div>
-                <div class="mode-tab" onclick="setMode('angle')">📐 GÓC</div>
-                <div class="mode-tab" onclick="setMode('area-volume')">📊 DT / TT ĐA DIỆN</div>
-                <div class="mode-tab active" onclick="setMode('graph3d')">🎨 ĐỒ THỊ 3D</div>
+                <div class="mode-tab" onclick="setMode('distance', this)">📏 KHOẢNG CÁCH</div>
+                <div class="mode-tab" onclick="setMode('angle', this)">📐 GÓC</div>
+                <div class="mode-tab" onclick="setMode('area-volume', this)">📊 DT / TT ĐA DIỆN</div>
+                <div class="mode-tab active" onclick="setMode('graph3d', this)">🎨 ĐỒ THỊ 3D</div>
             </div>
 
             <!-- ========== 1. KHOẢNG CÁCH ========== -->
@@ -628,10 +628,10 @@
         let appFunctions = [];
 
         // ========== CHUYỂN TAB CHÍNH ==========
-        function setMode(mode) {
+        function setMode(mode, el) {
             currentMode = mode;
             document.querySelectorAll('.mode-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
+            if (el) el.classList.add('active');
             document.getElementById('distance-mode').style.display = mode === 'distance' ? 'block' : 'none';
             document.getElementById('angle-mode').style.display = mode === 'angle' ? 'block' : 'none';
             document.getElementById('area-volume-mode').style.display = mode === 'area-volume' ? 'block' : 'none';
@@ -984,9 +984,7 @@
         function changeColor(el) { const colors=['#00f2ff','#10b981','#ffe500','#ff2d78','#bf5fff','#fb923c']; const cur=el.style.backgroundColor; let next=(colors.indexOf(cur)+1)%colors.length; if(next===-1) next=0; el.style.backgroundColor=colors[next]; updateGraph(); }
         function resetGraph() { document.getElementById('function-list').innerHTML = `<div class="func-item"><span style="color:#00f2ff;">z₁ =</span><input type="text" class="func-expr" value="sin(x)*cos(y)" oninput="updateGraph()"><div class="func-color" style="background:#00f2ff;" onclick="changeColor(this)"></div><button class="btn-small" onclick="removeFunction(this)">✖</button></div>`; updateGraph(); }
 
-        function toggleCS() { const s=document.getElementById('cs-sidebar'), o=document.getElementById('cs-overlay'); const isOpen=s.classList.toggle('open'); if(o) o.classList.toggle('visible',isOpen); document.body.style.overflow=isOpen?'hidden':''; }
-        function toggleSection(id) { const sec = document.getElementById(id); if(sec) sec.classList.toggle('collapsed'); }
-
+        // toggleCS() và toggleSection() được định nghĩa trong script.js (dùng chung)
         updateDistanceInputs();
         updateAngleInputs();
         setTimeout(() => { init3D(); updateGraph(); }, 100);

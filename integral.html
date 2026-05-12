@@ -416,21 +416,82 @@
         function copyDerivativeSolution() { const steps = document.getElementById('deriv-steps-container').innerText; navigator.clipboard.writeText("=== ĐẠO HÀM ===\n"+steps); const btn=document.querySelector('#deriv-steps .copy-sol-btn'); btn.textContent='✅ Đã Copy!'; setTimeout(()=>btn.textContent='📋 Copy',2000); }
 
         // ========== NGUYÊN HÀM ==========
+        // Bảng tra cứu nguyên hàm cơ bản (dùng khi math.js không hỗ trợ)
+        const ANTIDERIV_TABLE = [
+            { match: /^x\^(\d+)$/,         fn: (m) => `x^${+m[1]+1}/${+m[1]+1}` },
+            { match: /^(\d+)\*x\^(\d+)$/,  fn: (m) => `${+m[1]/(+m[2]+1)}*x^${+m[2]+1}` },
+            { match: /^(\d+)\*x$/,          fn: (m) => `${+m[1]/2}*x^2` },
+            { match: /^(\d+)$/,             fn: (m) => `${m[1]}*x` },
+            { match: /^x$/,                 fn: ()  => 'x^2/2' },
+            { match: /^1\/x$/,              fn: ()  => 'ln|x|' },
+            { match: /^sin\(x\)$/,          fn: ()  => '-cos(x)' },
+            { match: /^cos\(x\)$/,          fn: ()  => 'sin(x)' },
+            { match: /^tan\(x\)$/,          fn: ()  => '-ln|cos(x)|' },
+            { match: /^exp\(x\)$|^e\^x$/,  fn: ()  => 'e^x' },
+            { match: /^1\/(1\+x\^2)$/,     fn: ()  => 'arctan(x)' },
+            { match: /^1\/sqrt\(1-x\^2\)$/,fn: ()  => 'arcsin(x)' },
+            { match: /^sqrt\(x\)$/,         fn: ()  => '(2/3)*x^(3/2)' },
+            { match: /^1\/x\^2$/,           fn: ()  => '-1/x' },
+        ];
+
         function calculateAntiderivative() {
-            const expr = document.getElementById('antideriv-func').value;
-            let result = '';
-            if (expr === 'x^2') result = 'x³/3';
-            else if (expr === 'x') result = 'x²/2';
-            else if (expr === 'sin(x)') result = '-cos(x)';
-            else if (expr === 'cos(x)') result = 'sin(x)';
-            else if (expr === 'exp(x)' || expr === 'e^x') result = 'e^x';
-            else if (expr === '1/x') result = 'ln|x|';
-            else if (expr.includes('^')) { let m = expr.match(/x\^(\d+)/); if (m) result = `x^${parseInt(m[1])+1}/${parseInt(m[1])+1}`; }
-            else result = expr + 'x';
-            document.getElementById('anti-value').innerHTML = `\\( \\int ${expr} dx = ${result} + C \\)`;
+            const expr = document.getElementById('antideriv-func').value.trim();
+            if (!expr) { alert('Vui lòng nhập hàm số!'); return; }
+
+            let result = null;
+            let method = '';
+
+            // Thử dùng math.js derivative-based antiderivative (chỉ đa thức và một số hàm cơ bản)
+            try {
+                // math.js không có integrate trực tiếp, nên dùng bảng + symbolic trick:
+                // Thử parse và kiểm tra đây là đa thức bậc n không
+                const node = math.parse(expr);
+                // Lấy đạo hàm của candidate F rồi so sánh ngược — thay bằng bảng tra
+                result = null;
+            } catch(e) { result = null; }
+
+            // Tra bảng cơ bản
+            if (result === null) {
+                for (const entry of ANTIDERIV_TABLE) {
+                    const m = expr.match(entry.match);
+                    if (m) { result = entry.fn(m); method = 'table'; break; }
+                }
+            }
+
+            // Thử nhận diện đa thức tổng quát: ax^n
+            if (result === null) {
+                const mPoly = expr.match(/^([+-]?\d*\.?\d*)\*?x(\^([+-]?\d+\.?\d*))?$/);
+                if (mPoly) {
+                    const a = mPoly[1] === '' || mPoly[1] === '+' ? 1 : mPoly[1] === '-' ? -1 : parseFloat(mPoly[1]);
+                    const n = mPoly[3] !== undefined ? parseFloat(mPoly[3]) : 1;
+                    if (n !== -1) {
+                        const newN = n + 1;
+                        const coef = a / newN;
+                        result = `${+coef.toFixed(6)}*x^${newN}`;
+                        method = 'poly';
+                    } else {
+                        result = `${a !== 1 ? a + '*' : ''}ln|x|`;
+                        method = 'poly';
+                    }
+                }
+            }
+
+            if (result === null) {
+                // Fallback: thông báo không hỗ trợ thay vì trả về chuỗi sai
+                document.getElementById('anti-value').innerHTML =
+                    `<span style="color:var(--neon-pink);">⚠️ Không tự tính được nguyên hàm của <code>${expr}</code>.<br>Hãy thử: x^2, sin(x), cos(x), exp(x), 1/x, sqrt(x), ...</span>`;
+                document.getElementById('anti-result').style.display = 'block';
+                document.getElementById('anti-steps').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('anti-value').innerHTML = `\\( \\int ${expr}\\, dx = ${result} + C \\)`;
             document.getElementById('anti-result').style.display = 'block';
             document.getElementById('anti-steps').style.display = 'block';
-            document.getElementById('anti-steps-container').innerHTML = `<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">∫${expr} dx = ${result} + C</div></div></div>`;
+            document.getElementById('anti-steps-container').innerHTML = `
+                <div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-formula">f(x) = ${expr}</div></div></div>
+                <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-formula">F(x) = ${result} + C</div></div></div>
+            `;
             MathJax.typesetPromise();
         }
         function copyAntiderivativeSolution() { const steps = document.getElementById('anti-steps-container').innerText; navigator.clipboard.writeText("=== NGUYÊN HÀM ===\n"+steps); const btn=document.querySelector('#anti-steps .copy-sol-btn'); btn.textContent='✅ Đã Copy!'; setTimeout(()=>btn.textContent='📋 Copy',2000); }
@@ -512,17 +573,7 @@
         function copyVolumeCutSolution() { const steps = document.getElementById('vol-cut-steps-container').innerText; navigator.clipboard.writeText("=== THỂ TÍCH VẬT THỂ ===\n"+steps); const btn=document.querySelector('#vol-cut-steps .copy-sol-btn'); btn.textContent='✅ Đã Copy!'; setTimeout(()=>btn.textContent='📋 Copy',2000); }
 
         // ========== CHEAT SHEET ==========
-        function toggleCS() {
-            const sidebar = document.getElementById('cs-sidebar');
-            const overlay = document.getElementById('cs-overlay');
-            const isOpen = sidebar.classList.toggle('open');
-            if (overlay) overlay.classList.toggle('visible', isOpen);
-            document.body.style.overflow = isOpen ? 'hidden' : '';
-        }
-        function toggleSection(id) {
-            const sec = document.getElementById(id);
-            if (sec) sec.classList.toggle('collapsed');
-        }
+        // toggleCS() và toggleSection() được định nghĩa trong script.js (dùng chung)
 
         setMode('derivative');
         setAppMode('area');

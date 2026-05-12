@@ -339,20 +339,7 @@
             window.location.href = page;
         }
 
-        // Khi trang đích tải xong, tự động mở tab tương ứng
-        // Code này sẽ được thực thi trên các trang đích (probability.html, integral.html, geometry.html)
-        if (typeof window !== 'undefined') {
-            const openTab = sessionStorage.getItem('openTab');
-            if (openTab) {
-                sessionStorage.removeItem('openTab');
-                // Hàm này sẽ được gọi sau khi trang đã tải xong
-                window.addEventListener('load', function() {
-                    if (typeof switchTab === 'function') {
-                        switchTab(openTab);
-                    }
-                });
-            }
-        }
+
     </script>
 </body>
 </html>

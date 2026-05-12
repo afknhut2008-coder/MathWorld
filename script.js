@@ -239,23 +239,7 @@ document.addEventListener('input', (e) => {
         document.getElementById('prob-status').innerText  = 'Đã cập nhật dữ liệu.';
     }
 
-    // 2. TẦN SỐ (frequency.html — legacy)
-    if (document.getElementById('nOmega')) {
-        const nO   = parseFloat(document.getElementById('nOmega').value)  || 0;
-        const nA   = parseFloat(document.getElementById('nA').value)      || 0;
-        const nB   = parseFloat(document.getElementById('nB').value)      || 0;
-        const nAnB = parseFloat(document.getElementById('nAnB_f').value)  || 0;
-        if (nO > 0) {
-            setVal('pA_f', nA / nO);
-            setVal('pB_f', nB / nO);
-            const nU = nA + nB - nAnB;
-            const elNU = document.getElementById('nU');
-            if (elNU) elNU.innerText = nU;
-            setVal('pU', nU / nO);
-        }
-    }
-
-    // 3. ĐIỀU KIỆN + BAYES (conditional.html)
+    // 2. ĐIỀU KIỆN + BAYES (conditional.html)
     if (document.getElementById('cA')) {
         calcTree();
     }

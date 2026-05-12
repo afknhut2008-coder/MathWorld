@@ -1229,11 +1229,8 @@
             }
         });
 
-        // Lưu tên biến cố
-        ['name-A','name-B','name-notA','name-notB'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.addEventListener('input', () => { if(document.getElementById('pA')) calculateClassic(); });
-        });
+        // Lưu tên biến cố — xử lý bởi script.js (global input listener)
+        // Không cần đăng ký lại ở đây để tránh chạy calculateClassic() 2 lần
         ['cond-name-A','cond-name-B','cond-name-notA','cond-name-notB'].forEach(id => {
             const el = document.getElementById(id);
             if(el) el.addEventListener('input', calculateBayes);
