@@ -679,11 +679,14 @@
                 canvas.style.width = w + 'px';
                 canvas.style.height = h + 'px';
                 ctx.scale(dpr, dpr);
+                // Lưu kích thước CSS (pixel không DPR) để dùng cho touch
+                C.cssW = w;
+                C.cssH = h;
                 C.w = w;
                 C.h = h;
                 return { w, h };
             }
-            let C = { w: 0, h: 0 };
+            let C = { w: 0, h: 0, cssW: 0, cssH: 0 };
             window.addEventListener('resize', () => { C = resizeCanvas(); });
             window.addEventListener('orientationchange', () => { setTimeout(resizeCanvas, 200); });
 
@@ -749,7 +752,7 @@
                 spawnTimer: 0,
                 damageFlash: 0,
 
-                // Lưu target dưới dạng pixel
+                // Target dưới dạng pixel (tọa độ trên canvas)
                 targetX: undefined,
                 targetY: undefined,
             };
@@ -1808,9 +1811,9 @@
             setupTouchButton(leftBtn, 'left');
             setupTouchButton(rightBtn, 'right');
 
-            // ========== DI CHUYỂN BẰNG CHUỘT / CHẠM ==========
-            function handleCanvasPointer(e) {
-                // Chỉ xử lý nếu sự kiện đến trực tiếp từ canvas
+            // ========== SỰ KIỆN CHUỘT / CHẠM - SỬA THEO YÊU CẦU ==========
+            function handlePointerDown(e) {
+                // Chỉ xử lý nếu sự kiện đến từ canvas
                 if (e.target !== canvas) return;
                 if (!state.isPlaying || state.gameOver) return;
                 e.preventDefault();
@@ -1827,43 +1830,45 @@
 
                 if (clientX === undefined || clientY === undefined) return;
 
-                // Tính tọa độ pixel trên canvas (dựa trên CSS size)
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const canvasX = (clientX - rect.left) * scaleX;
-                const canvasY = (clientY - rect.top) * scaleY;
+                // Tính tọa độ pixel trên canvas
+                const canvasX = clientX - rect.left;
+                const canvasY = clientY - rect.top;
 
-                // Giới hạn trong [0, C.w] và [0, C.h]
-                const targetX = clamp(canvasX, 0, C.w);
-                const targetY = clamp(canvasY, 0, C.h);
+                // Giới hạn trong phạm vi canvas
+                const targetX = clamp(canvasX, 0, C.cssW || C.w);
+                const targetY = clamp(canvasY, 0, C.cssH || C.h);
 
-                // Lưu target dưới dạng pixel
                 if (!isNaN(targetX) && !isNaN(targetY)) {
                     state.targetX = targetX;
                     state.targetY = targetY;
                 }
             }
 
-            // Sự kiện chuột và chạm
-            canvas.addEventListener('click', handleCanvasPointer);
-            canvas.addEventListener('touchstart', handleCanvasPointer, { passive: false });
-            canvas.addEventListener('touchmove', (e) => {
+            function handlePointerMove(e) {
+                // Chỉ xử lý nếu sự kiện đến từ canvas và đang chạm (touchmove)
                 if (e.target !== canvas) return;
                 if (!state.isPlaying || state.gameOver) return;
+                // Chỉ xử lý cho touchmove, không xử lý mousemove để tránh can thiệp
+                if (!e.touches) return;
                 e.preventDefault();
+
                 const rect = canvas.getBoundingClientRect();
                 const touch = e.touches[0];
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const canvasX = (touch.clientX - rect.left) * scaleX;
-                const canvasY = (touch.clientY - rect.top) * scaleY;
-                const targetX = clamp(canvasX, 0, C.w);
-                const targetY = clamp(canvasY, 0, C.h);
+                const canvasX = touch.clientX - rect.left;
+                const canvasY = touch.clientY - rect.top;
+                const targetX = clamp(canvasX, 0, C.cssW || C.w);
+                const targetY = clamp(canvasY, 0, C.cssH || C.h);
+
                 if (!isNaN(targetX) && !isNaN(targetY)) {
                     state.targetX = targetX;
                     state.targetY = targetY;
                 }
-            }, { passive: false });
+            }
+
+            // Gắn sự kiện
+            canvas.addEventListener('mousedown', handlePointerDown);
+            canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+            canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
 
             // ========== FULLSCREEN ==========
             fullscreenBtn.addEventListener('click', () => {
