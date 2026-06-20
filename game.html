@@ -99,8 +99,7 @@
             display: block;
             background: #0a1628;
             touch-action: none;
-            cursor: none;
-            image-rendering: pixelated;
+            cursor: pointer; /* thêm con trỏ tay để biết có thể click */
         }
 
         /* ===== PANEL ===== */
@@ -439,7 +438,7 @@
             #controls { display: none !important; }
         }
 
-        /* ========== NAVIGATION (đồng bộ với các trang khác) ========== */
+        /* ========== NAVIGATION ========== */
         nav {
             background: rgba(2, 6, 23, 0.85);
             backdrop-filter: blur(12px);
@@ -526,9 +525,9 @@
             .logo { font-size: 1.2rem; }
             nav ul li a { padding: 6px 12px; font-size: 0.65rem; }
         }
-        /* Điều chỉnh lại cho app để nav nằm trên top-bar */
+        /* Điều chỉnh app để nav nằm trên top-bar */
         #app {
-            height: calc(100vh - 60px); /* trừ đi chiều cao nav */
+            height: calc(100vh - 60px);
             margin-top: 0;
         }
         nav {
@@ -538,7 +537,7 @@
     </style>
 </head>
 <body>
-    <!-- ===== NAVIGATION (đồng bộ với các trang khác) ===== -->
+    <!-- ===== NAVIGATION ===== -->
     <nav>
         <div class="nav-container">
             <a href="index.html" class="logo">
@@ -1390,6 +1389,7 @@
                     if (state.specialCooldown > 0) state.specialCooldown -= dt * 0.08;
                 }
 
+                // ===== DI CHUYỂN TỪ BÀN PHÍM / D-PAD =====
                 let dx = 0, dy = 0;
                 if (state.keys.up) dy = -1;
                 if (state.keys.down) dy = 1;
@@ -1399,6 +1399,28 @@
                 const speed = state.speed * state.moveSpeedBonus * dt;
                 let newX = state.px + dx * speed;
                 let newY = state.py + dy * speed;
+
+                // ===== DI CHUYỂN TỪ CHẠM/CLICK (được xử lý qua sự kiện riêng) =====
+                // Biến targetX, targetY được cập nhật từ sự kiện click/touch
+                // Nếu có target, di chuyển dần về đó
+                if (state.targetX !== undefined && state.targetY !== undefined) {
+                    const tdx = state.targetX - state.px;
+                    const tdy = state.targetY - state.py;
+                    const tdist = Math.hypot(tdx, tdy);
+                    if (tdist > 2) {
+                        const moveSpeed = Math.min(state.speed * state.moveSpeedBonus * dt * 1.2, tdist);
+                        newX = state.px + (tdx / tdist) * moveSpeed;
+                        newY = state.py + (tdy / tdist) * moveSpeed;
+                    } else {
+                        // Đã đến gần target
+                        state.px = state.targetX;
+                        state.py = state.targetY;
+                        state.targetX = undefined;
+                        state.targetY = undefined;
+                    }
+                }
+
+                // Áp dụng giới hạn và va chạm
                 newX = clamp(newX, state.radius, C.w - state.radius);
                 newY = clamp(newY, state.radius, C.h - state.radius);
                 let blocked = false;
@@ -1410,6 +1432,7 @@
                 }
                 if (!blocked) { state.px = newX; state.py = newY; }
                 else {
+                    // Thử di chuyển riêng từng trục
                     let testX = state.px + dx * speed;
                     let testY = state.py;
                     let blockedX = false;
@@ -1430,6 +1453,11 @@
                         }
                     }
                     if (!blockedY) state.py = testY;
+                    // Nếu bị chặn cả hai hướng, hủy target di chuyển
+                    if (blockedX && blockedY) {
+                        state.targetX = undefined;
+                        state.targetY = undefined;
+                    }
                 }
 
                 state.spawnTimer += dt;
@@ -1682,6 +1710,8 @@
                 state.isQuestionActive = false;
                 state.px = C.w * 0.5;
                 state.py = C.h * 0.5;
+                state.targetX = undefined;
+                state.targetY = undefined;
                 state.enemies = [];
                 state.projectiles = [];
                 state.particles = [];
@@ -1732,6 +1762,9 @@
                     const map = { 'ArrowUp':'up','w':'up','W':'up', 'ArrowDown':'down','s':'down','S':'down',
                                   'ArrowLeft':'left','a':'left','A':'left', 'ArrowRight':'right','d':'right','D':'right' };
                     state.keys[map[key]] = true;
+                    // Khi nhấn phím di chuyển, hủy target click để tránh xung đột
+                    state.targetX = undefined;
+                    state.targetY = undefined;
                 }
             });
             document.addEventListener('keyup', (e) => {
@@ -1759,6 +1792,59 @@
             setupTouchButton(downBtn, 'down');
             setupTouchButton(leftBtn, 'left');
             setupTouchButton(rightBtn, 'right');
+
+            // ========== DI CHUYỂN BẰNG CHUỘT / CHẠM TRÊN CANVAS ==========
+            function handleCanvasClick(e) {
+                if (!state.isPlaying || state.gameOver) return;
+                e.preventDefault();
+
+                // Lấy tọa độ tương đối trên canvas
+                const rect = canvas.getBoundingClientRect();
+                let clientX, clientY;
+                if (e.touches) {
+                    // Touch event
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                    e.preventDefault(); // ngăn cuộn trang
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                // Tọa độ trong canvas (px)
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasX = (clientX - rect.left) * scaleX;
+                const canvasY = (clientY - rect.top) * scaleY;
+
+                // Chuyển sang tỉ lệ (0-1) để dùng với state.px, state.py
+                const ratioX = clamp(canvasX / C.w, 0, 1);
+                const ratioY = clamp(canvasY / C.h, 0, 1);
+
+                // Đặt target
+                state.targetX = ratioX;
+                state.targetY = ratioY;
+            }
+
+            // Sự kiện click chuột
+            canvas.addEventListener('click', handleCanvasClick);
+            // Sự kiện chạm (touch)
+            canvas.addEventListener('touchstart', handleCanvasClick, { passive: false });
+            // Cũng hỗ trợ touchmove để di chuyển liên tục nếu giữ và kéo
+            canvas.addEventListener('touchmove', (e) => {
+                if (!state.isPlaying || state.gameOver) return;
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasX = (touch.clientX - rect.left) * scaleX;
+                const canvasY = (touch.clientY - rect.top) * scaleY;
+                const ratioX = clamp(canvasX / C.w, 0, 1);
+                const ratioY = clamp(canvasY / C.h, 0, 1);
+                state.targetX = ratioX;
+                state.targetY = ratioY;
+            }, { passive: false });
 
             // ========== FULLSCREEN ==========
             fullscreenBtn.addEventListener('click', () => {
