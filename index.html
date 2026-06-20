@@ -104,9 +104,13 @@
             padding: 20px 20px 12px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
             transition: 0.3s;
-        }
-        .category-card .category-header {
             cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            color: inherit;
+            font: inherit;
         }
         .category-icon {
             font-size: 2.2rem;
@@ -120,6 +124,7 @@
         .category-title.blue { color: var(--neon-blue); }
         .category-title.green { color: var(--emerald); }
         .category-title.purple { color: var(--neon-purple); }
+        .category-title.gold { color: var(--neon-yellow); }
         .category-desc {
             font-size: 0.8rem;
             color: var(--text-mid);
@@ -144,6 +149,10 @@
             text-decoration: none;
             color: var(--text-mid);
             cursor: pointer;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font: inherit;
         }
         .tool-item:hover {
             background: rgba(0,242,255,0.1);
@@ -173,9 +182,15 @@
             border-radius: 30px; transition: 0.3s;
         }
         .fb-link:hover { background: rgba(96,165,250,0.1); transform: translateY(-2px); }
+        .footer-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
         @media (max-width: 700px) {
             .category-grid { grid-template-columns: 1fr; }
             .footer { flex-direction: column; text-align: center; }
+            .footer-links { justify-content: center; }
         }
     </style>
 </head>
@@ -202,6 +217,7 @@
                 <li><a href="probability.html">Xác suất</a></li>
                 <li><a href="integral.html">Tích phân</a></li>
                 <li><a href="geometry.html">Oxyz</a></li>
+                <li><a href="game.html">🎮 Game</a></li>
             </ul>
         </div>
     </nav>
@@ -223,7 +239,7 @@
                     <div class="ml-class-tag">LỚP 12B2 · ĐỒNG HÀNH CÙNG BẠN</div>
                 </div>
                 <h1 class="hero-title">HỆ THỐNG GIẢI TOÁN TÍCH HỢP</h1>
-                <p class="hero-sub">Xác suất · Tích phân · Hình học Oxyz — Công cụ hỗ trợ học tập chuyên nghiệp, kết quả tức thì.</p>
+                <p class="hero-sub">Xác suất · Tích phân · Hình học Oxyz · Game giáo dục — Công cụ hỗ trợ học tập chuyên nghiệp, kết quả tức thì.</p>
             </div>
 
             <!-- CÁC CHUYÊN ĐỀ -->
@@ -242,17 +258,17 @@
                             <span>📊</span>
                             <span class="tool-name">Xác suất cổ điển</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                         <button class="tool-item" onclick="goToPage('probability.html', 'conditional')">
                             <span>🌿</span>
                             <span class="tool-name">Xác suất điều kiện</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                         <button class="tool-item" onclick="goToPage('probability.html', 'statistics')">
                             <span>📈</span>
                             <span class="tool-name">Bảng thống kê</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                     </div>
                 </div>
 
@@ -270,22 +286,22 @@
                             <span>📈</span>
                             <span class="tool-name">Đạo hàm f'(x)</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                         <button class="tool-item" onclick="goToPage('integral.html', 'integral')">
                             <span>∫</span>
                             <span class="tool-name">Nguyên hàm F(x) + C</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                         <button class="tool-item" onclick="goToPage('integral.html', 'definite')">
                             <span>🎯</span>
                             <span class="tool-name">Tích phân xác định</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                         <button class="tool-item" onclick="goToPage('integral.html', 'application')">
                             <span>📊</span>
                             <span class="tool-name">Diện tích & Thể tích tròn xoay</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                     </div>
                 </div>
 
@@ -303,29 +319,65 @@
                             <span>📏</span>
                             <span class="tool-name">Khoảng cách (điểm, đường, mặt)</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                         <button class="tool-item" onclick="goToPage('geometry.html', 'angle')">
                             <span>📐</span>
                             <span class="tool-name">Góc (vector, đường, mặt)</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
                         <button class="tool-item" onclick="goToPage('geometry.html', 'area-volume')">
                             <span>📊</span>
                             <span class="tool-name">Diện tích & Thể tích khối đa diện</span>
                             <span class="tool-arrow">→</span>
-                            </button>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. GAME -->
+                <div class="category-card">
+                    <button class="category-header" onclick="goToPage('game.html')">
+                        <span class="category-icon">🎮</span>
+                        <span class="category-title gold">GAME GIẢI TRÍ</span>
+                    </button>
+                    <div class="category-desc">
+                        Phiêu lưu toán học với nhân vật lốp xe, trả lời câu hỏi để chiến đấu, mở khóa kỹ năng và trang bị.
+                    </div>
+                    <div class="tool-list">
+                        <button class="tool-item" onclick="goToPage('game.html')">
+                            <span>⚔️</span>
+                            <span class="tool-name">Phiêu lưu toán học</span>
+                            <span class="tool-arrow">→</span>
+                        </button>
+                        <button class="tool-item" onclick="goToPage('game.html')">
+                            <span>🧩</span>
+                            <span class="tool-name">Thử thách trí tuệ</span>
+                            <span class="tool-arrow">→</span>
+                        </button>
+                        <button class="tool-item" onclick="goToPage('game.html')">
+                            <span>🏆</span>
+                            <span class="tool-name">Bảng xếp hạng</span>
+                            <span class="tool-arrow">→</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
+            <!-- ====== FOOTER MỚI ====== -->
             <div class="footer">
                 <div class="footer-meta">
                     <strong>Dự án CNTT1</strong> · Trang web của Minh Nhựt · Lớp 12B2
                 </div>
-                <a href="https://www.facebook.com/share/18PJjx59gY/" target="_blank" class="fb-link">
-                    🔗 KẾT NỐI FACEBOOK
-                </a>
+                <div class="footer-links">
+                    <a href="https://www.facebook.com/share/18PJjx59gY/" target="_blank" class="fb-link">
+                        🔗 KẾT NỐI FACEBOOK
+                    </a>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfIyITb-FoMe9XZ0LOunoe7VuYmm_WEeblLdJ7Fx8igMU6N9g/viewform?usp=publish-editor" target="_blank" class="fb-link">
+                        📝 GÓP Ý
+                    </a>
+                </div>
             </div>
+            <!-- ======================== -->
+
         </div>
     </div>
 
@@ -334,13 +386,10 @@
         // Hàm chuyển trang với khả năng chuyển đến tab cụ thể
         function goToPage(page, tabId = null) {
             if (tabId) {
-                // Lưu tab cần mở vào sessionStorage
                 sessionStorage.setItem('openTab', tabId);
             }
             window.location.href = page;
         }
-
-
     </script>
 </body>
 </html>
