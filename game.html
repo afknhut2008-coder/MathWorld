@@ -256,7 +256,7 @@
             z-index: 30;
             padding: 0 12px 100px;
             background: transparent;
-            pointer-events: none; /* Quan trọng: cho phép tương tác xuyên qua */
+            pointer-events: none;
         }
         .overlay.show { display: flex; }
 
@@ -679,6 +679,8 @@
                 canvas.style.width = w + 'px';
                 canvas.style.height = h + 'px';
                 ctx.scale(dpr, dpr);
+                C.w = w;
+                C.h = h;
                 return { w, h };
             }
             let C = { w: 0, h: 0 };
@@ -747,6 +749,7 @@
                 spawnTimer: 0,
                 damageFlash: 0,
 
+                // Lưu target dưới dạng pixel
                 targetX: undefined,
                 targetY: undefined,
             };
@@ -1406,15 +1409,13 @@
                 let newX = state.px;
                 let newY = state.py;
 
-                // Ưu tiên target (touch/click) nếu có và hợp lệ
+                // Ưu tiên target (touch/click) nếu có - giờ là pixel
                 if (state.targetX !== undefined && state.targetY !== undefined &&
-                    state.targetX >= 0 && state.targetX <= 1 &&
-                    state.targetY >= 0 && state.targetY <= 1 &&
                     !isNaN(state.targetX) && !isNaN(state.targetY)) {
                     const tdx = state.targetX - state.px;
                     const tdy = state.targetY - state.py;
                     const tdist = Math.hypot(tdx, tdy);
-                    if (tdist > 0.005) {
+                    if (tdist > 5) {
                         const moveSpeed = Math.min(speed * 1.2, tdist);
                         newX = state.px + (tdx / tdist) * moveSpeed;
                         newY = state.py + (tdy / tdist) * moveSpeed;
@@ -1807,11 +1808,10 @@
             setupTouchButton(leftBtn, 'left');
             setupTouchButton(rightBtn, 'right');
 
-            // ========== DI CHUYỂN BẰNG CHUỘT / CHẠM (CHỈ TRÊN CANVAS) ==========
+            // ========== DI CHUYỂN BẰNG CHUỘT / CHẠM ==========
             function handleCanvasPointer(e) {
-                // Chỉ xử lý nếu sự kiện đến trực tiếp từ canvas (không phải từ phần tử con)
+                // Chỉ xử lý nếu sự kiện đến trực tiếp từ canvas
                 if (e.target !== canvas) return;
-
                 if (!state.isPlaying || state.gameOver) return;
                 e.preventDefault();
 
@@ -1827,26 +1827,24 @@
 
                 if (clientX === undefined || clientY === undefined) return;
 
-                // Tọa độ trong canvas (px)
+                // Tính tọa độ pixel trên canvas (dựa trên CSS size)
                 const scaleX = canvas.width / rect.width;
                 const scaleY = canvas.height / rect.height;
                 const canvasX = (clientX - rect.left) * scaleX;
                 const canvasY = (clientY - rect.top) * scaleY;
 
-                // Chuyển sang tỉ lệ (0-1)
-                const ratioX = clamp(canvasX / C.w, 0, 1);
-                const ratioY = clamp(canvasY / C.h, 0, 1);
+                // Giới hạn trong [0, C.w] và [0, C.h]
+                const targetX = clamp(canvasX, 0, C.w);
+                const targetY = clamp(canvasY, 0, C.h);
 
-                // Chỉ đặt target nếu tọa độ hợp lệ và nằm trong phạm vi canvas
-                if (!isNaN(ratioX) && !isNaN(ratioY) &&
-                    ratioX >= 0 && ratioX <= 1 &&
-                    ratioY >= 0 && ratioY <= 1) {
-                    state.targetX = ratioX;
-                    state.targetY = ratioY;
+                // Lưu target dưới dạng pixel
+                if (!isNaN(targetX) && !isNaN(targetY)) {
+                    state.targetX = targetX;
+                    state.targetY = targetY;
                 }
             }
 
-            // Sự kiện chuột và chạm chỉ trên canvas
+            // Sự kiện chuột và chạm
             canvas.addEventListener('click', handleCanvasPointer);
             canvas.addEventListener('touchstart', handleCanvasPointer, { passive: false });
             canvas.addEventListener('touchmove', (e) => {
@@ -1859,11 +1857,11 @@
                 const scaleY = canvas.height / rect.height;
                 const canvasX = (touch.clientX - rect.left) * scaleX;
                 const canvasY = (touch.clientY - rect.top) * scaleY;
-                const ratioX = clamp(canvasX / C.w, 0, 1);
-                const ratioY = clamp(canvasY / C.h, 0, 1);
-                if (!isNaN(ratioX) && !isNaN(ratioY) && ratioX >= 0 && ratioX <= 1 && ratioY >= 0 && ratioY <= 1) {
-                    state.targetX = ratioX;
-                    state.targetY = ratioY;
+                const targetX = clamp(canvasX, 0, C.w);
+                const targetY = clamp(canvasY, 0, C.h);
+                if (!isNaN(targetX) && !isNaN(targetY)) {
+                    state.targetX = targetX;
+                    state.targetY = targetY;
                 }
             }, { passive: false });
 
