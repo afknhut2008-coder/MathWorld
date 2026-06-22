@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thống Kê - MathLab 12B2</title>
-    <meta name="description" content="Thống Kê Mô Tả — MathLab 12B2. Tính trung bình, phương sai, độ lệch chuẩn, tứ phân vị cho học sinh lớp 12.">
+    <title>Thống Kê - MathWorld B2</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <meta name="description" content="Thống Kê Mô Tả — MathWorld B2. Tính trung bình, phương sai, độ lệch chuẩn, tứ phân vị cho học sinh lớp 12.">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     <style>
@@ -274,7 +275,7 @@
     <nav>
     <div class="nav-container">
         <a href="index.html" class="logo">
-            MATHLAB <span>12B2</span>
+            MATHWORLD <span>B2</span>
         </a>
         <ul>
     <li><a href="index.html">Trang Chủ</a></li>
@@ -768,7 +769,7 @@
                 const formula = step.querySelector('.step-formula')?.innerText || '';
                 text += `${idx + 1}. ${title}\n${formula}\n\n`;
             });
-            text += "=== MathLab 12B2 — by Minh Nhựt ===";
+            text += "=== MathWorld B2 — by Minh Nhựt ===";
             
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.getElementById('stats-copy-btn');

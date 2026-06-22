@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MathWheel - Phiêu lưu Toán học</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="stylesheet" href="style.css">
     <style>
         /* ===== BASE ===== */
@@ -543,7 +544,7 @@
     <nav>
         <div class="nav-container">
             <a href="index.html" class="logo">
-                MATHLAB <span>12B2</span>
+                MATHWORLD <span>B2</span>
             </a>
             <ul>
                 <li><a href="index.html">Trang Chủ</a></li>
@@ -559,7 +560,7 @@
     <div id="app">
         <!-- TOP BAR -->
         <div id="top-bar">
-            <div id="player-name">🧮 <span id="pName">Anh Hùng</span></div>
+            <div id="player-name">🧮 <span id="pName">Lốp trưởng giải Toán</span></div>
             <div class="stats">
                 <span class="stat-score">🏆 <span id="scoreDisp">0</span></span>
                 <span class="stat-health">❤️ <span id="healthDisp">5</span></span>
@@ -710,7 +711,7 @@
 
             // ========== GAME STATE ==========
             const state = {
-                playerName: 'Anh Hùng',
+                playerName: 'Lốp',
                 score: 0,
                 health: 5,
                 maxHealth: 5,
@@ -1718,7 +1719,7 @@
 
             // ========== INIT GAME ==========
             function initGame(playerName) {
-                state.playerName = playerName || 'Anh Hùng';
+                state.playerName = playerName || 'Lốp';
                 state.score = 0;
                 state.health = state.maxHealth;
                 state.level = 1;
@@ -1884,7 +1885,7 @@
 
             // ========== START / RESTART ==========
             startBtn.addEventListener('click', () => {
-                const name = nameInput.value.trim() || 'Anh Hùng';
+                const name = nameInput.value.trim() || 'Lốp';
                 initGame(name);
             });
             nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') startBtn.click(); });
