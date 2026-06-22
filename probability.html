@@ -749,23 +749,23 @@
                     <div class="tree-row">
                         <div class="tree-column">
                             <div id="lbl-cA" style="color:var(--neon-blue);">P(A)</div>
-                            <input type="number" id="cA" placeholder="0.00" step="0.0001" style="max-width:140px;" oninput="calculateBayes()">
+                            <input type="number" id="cA" placeholder="0.00" step="0.0001" style="max-width:140px;">
                             <div class="tree-node">
                                 <small id="lbl-node-A">Biến cố A</small>
                                 <div class="tree-branch-row">
-                                    <div class="tree-branch-cell"><small>P(B|A)</small><br><input type="number" id="cB_A" class="tree-branch-input" step="0.0001" oninput="calculateBayes()"><div><small>P(A∩B)</small><br><small class="neon-text" id="rAB">0</small></div></div>
-                                    <div class="tree-branch-cell"><small>P(B'|A)</small><br><input type="number" id="cNotB_A" class="tree-branch-input" step="0.0001" oninput="calculateBayes()"><div><small>P(A∩B')</small><br><small class="neon-text" id="rAnBnot">0</small></div></div>
+                                    <div class="tree-branch-cell"><small>P(B|A)</small><br><input type="number" id="cB_A" class="tree-branch-input" step="0.0001"><div><small>P(A∩B)</small><br><small class="neon-text" id="rAB">0</small></div></div>
+                                    <div class="tree-branch-cell"><small>P(B'|A)</small><br><input type="number" id="cNotB_A" class="tree-branch-input" step="0.0001"><div><small>P(A∩B')</small><br><small class="neon-text" id="rAnBnot">0</small></div></div>
                                 </div>
                             </div>
                         </div>
                         <div class="tree-column">
                             <div id="lbl-cNotA" style="color:#94a3b8;">P(A')</div>
-                            <input type="number" id="cNotA" placeholder="0.00" step="0.0001" style="max-width:140px;" oninput="calculateBayes()">
+                            <input type="number" id="cNotA" placeholder="0.00" step="0.0001" style="max-width:140px;">
                             <div class="tree-node">
                                 <small id="lbl-node-nA">Biến cố A'</small>
                                 <div class="tree-branch-row">
-                                    <div class="tree-branch-cell"><small>P(B|A')</small><br><input type="number" id="cB_notA" class="tree-branch-input" step="0.0001" oninput="calculateBayes()"><div><small>P(A'∩B)</small><br><small class="neon-text" id="rnotAB">0</small></div></div>
-                                    <div class="tree-branch-cell"><small>P(B'|A')</small><br><input type="number" id="cNotB_notA" class="tree-branch-input" step="0.0001" oninput="calculateBayes()"><div><small>P(A'∩B')</small><br><small class="neon-text" id="rnotAnBnot">0</small></div></div>
+                                    <div class="tree-branch-cell"><small>P(B|A')</small><br><input type="number" id="cB_notA" class="tree-branch-input" step="0.0001"><div><small>P(A'∩B)</small><br><small class="neon-text" id="rnotAB">0</small></div></div>
+                                    <div class="tree-branch-cell"><small>P(B'|A')</small><br><input type="number" id="cNotB_notA" class="tree-branch-input" step="0.0001"><div><small>P(A'∩B')</small><br><small class="neon-text" id="rnotAnBnot">0</small></div></div>
                                 </div>
                             </div>
                         </div>
@@ -1175,47 +1175,106 @@
             setTimeout(() => btn.textContent = '📋 Copy', 2000);
         }
 
-        // ========== BAYES ==========
+        // ==================== BAYES MỚI ====================
         function calculateBayes() {
+            const errEl = document.getElementById('msg-error');
+            if (errEl) errEl.innerText = '';
+
             let pA = parseFloat(document.getElementById('cA').value);
             let pNotA = parseFloat(document.getElementById('cNotA').value);
             const pB_A = parseFloat(document.getElementById('cB_A').value) || 0;
             const pNB_A = parseFloat(document.getElementById('cNotB_A').value) || 0;
             const pB_nA = parseFloat(document.getElementById('cB_notA').value) || 0;
             const pNB_nA = parseFloat(document.getElementById('cNotB_notA').value) || 0;
+
+            // Nếu có một ô nhập, tự động tính ô đối
+            if (isNaN(pA) && !isNaN(pNotA)) pA = 1 - pNotA;
+            if (isNaN(pNotA) && !isNaN(pA)) pNotA = 1 - pA;
+
             if (isNaN(pA) && isNaN(pNotA)) return;
-            if (isNaN(pA)) pA = 1 - pNotA;
-            if (isNaN(pNotA)) pNotA = 1 - pA;
-            const pAB = pA * pB_A, pANB = pA * pNB_A, pNAB = pNotA * pB_nA, pNANB = pNotA * pNB_nA;
-            const pB = pAB + pNAB, pBnot = pANB + pNANB;
-            document.getElementById('rAB').innerHTML = pAB.toFixed(6);
-            document.getElementById('rAnBnot').innerHTML = pANB.toFixed(6);
-            document.getElementById('rnotAB').innerHTML = pNAB.toFixed(6);
-            document.getElementById('rnotAnBnot').innerHTML = pNANB.toFixed(6);
-            document.getElementById('pBT_input').value = pB.toFixed(6);
-            document.getElementById('pBnotT_input').value = pBnot.toFixed(6);
+
+            if (pA < 0 || pA > 1 || pNotA < 0 || pNotA > 1) {
+                if (errEl) errEl.innerText = '⚠️ Xác suất phải nằm trong [0, 1]';
+                return;
+            }
+            if (Math.abs(pA + pNotA - 1) > 1e-4) {
+                if (errEl) errEl.innerText = '⚠️ P(A) + P(A\') phải bằng 1. Hiện tại: ' + Math.round((pA + pNotA) * 10000) / 10000;
+                return;
+            }
+
+            const pAB = pA * pB_A;
+            const pANB = pA * pNB_A;
+            const pNAB = pNotA * pB_nA;
+            const pNANB = pNotA * pNB_nA;
+
+            document.getElementById('rAB').innerText = Math.round(pAB * 10000) / 10000;
+            document.getElementById('rAnBnot').innerText = Math.round(pANB * 10000) / 10000;
+            document.getElementById('rnotAB').innerText = Math.round(pNAB * 10000) / 10000;
+            document.getElementById('rnotAnBnot').innerText = Math.round(pNANB * 10000) / 10000;
+
+            const pB = pAB + pNAB;
+            const pBnot = pANB + pNANB;
+
+            document.getElementById('pBT_input').value = Math.round(pB * 10000) / 10000;
+            document.getElementById('pBnotT_input').value = Math.round(pBnot * 10000) / 10000;
+
             if (pB > 1e-9) {
-                document.getElementById('pAgB_input').value = (pAB / pB).toFixed(6);
-                document.getElementById('pNotAgB_input').value = (pNAB / pB).toFixed(6);
+                document.getElementById('pAgB_input').value = Math.round((pAB / pB) * 10000) / 10000;
+                document.getElementById('pNotAgB_input').value = Math.round((pNAB / pB) * 10000) / 10000;
+            } else {
+                document.getElementById('pAgB_input').value = '';
+                document.getElementById('pNotAgB_input').value = '';
             }
+
             if (pBnot > 1e-9) {
-                document.getElementById('pAgBnot_input').value = (pANB / pBnot).toFixed(6);
-                document.getElementById('pNotAgBnot_input').value = (pNANB / pBnot).toFixed(6);
+                document.getElementById('pAgBnot_input').value = Math.round((pANB / pBnot) * 10000) / 10000;
+                document.getElementById('pNotAgBnot_input').value = Math.round((pNANB / pBnot) * 10000) / 10000;
+            } else {
+                document.getElementById('pAgBnot_input').value = '';
+                document.getElementById('pNotAgBnot_input').value = '';
             }
-            buildBayesSteps(pA, pNotA, pB_A, pNB_A, pB_nA, pNB_nA, pAB, pANB, pNAB, pNANB, pB, pBnot);
         }
 
-        function buildBayesSteps(pA, pNotA, pB_A, pNB_A, pB_nA, pNB_nA, pAB, pANB, pNAB, pNANB, pB, pBnot) {
-            const container = document.getElementById('bayes-steps-container');
-            if (!container) return;
-            document.getElementById('bayes-steps').style.display = 'block';
-            container.innerHTML = `
-                <div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-title">Dữ liệu</div><div class="step-formula">P(A)=${pA.toFixed(4)}, P(A')=${pNotA.toFixed(4)}<br>P(B|A)=${pB_A.toFixed(4)}, P(B'|A)=${pNB_A.toFixed(4)}<br>P(B|A')=${pB_nA.toFixed(4)}, P(B'|A')=${pNB_nA.toFixed(4)}</div></div></div>
-                <div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Tích nhánh</div><div class="step-formula">P(A∩B)=${pAB.toFixed(4)}, P(A∩B')=${pANB.toFixed(4)}, P(A'∩B)=${pNAB.toFixed(4)}, P(A'∩B')=${pNANB.toFixed(4)}</div></div></div>
-                <div class="step-card"><div class="step-num">3</div><div class="step-body"><div class="step-title">Toàn phần</div><div class="step-formula">P(B)=${pB.toFixed(4)}, P(B')=${pBnot.toFixed(4)}</div></div></div>
-                <div class="step-card"><div class="step-num">4</div><div class="step-body"><div class="step-title">Bayes</div><div class="step-formula">P(A|B)=${(pAB/pB).toFixed(4)}, P(A'|B)=${(pNAB/pB).toFixed(4)}<br>P(A|B')=${(pANB/pBnot).toFixed(4)}, P(A'|B')=${(pNANB/pBnot).toFixed(4)}</div></div></div>
-            `;
+        function bindComplement(sourceId, targetId) {
+            const source = document.getElementById(sourceId);
+            const target = document.getElementById(targetId);
+            if (!source || !target) return;
+
+            let isUpdating = false;
+
+            source.addEventListener('input', () => {
+                if (isUpdating) return;
+                isUpdating = true;
+
+                const v = parseFloat(source.value);
+                if (!isNaN(v) && v >= 0 && v <= 1) {
+                    target.value = Math.round((1 - v) * 10000) / 10000;
+                    calculateBayes();
+                } else if (source.value === '') {
+                    target.value = '';
+                    calculateBayes();
+                }
+
+                isUpdating = false;
+            });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Bù trừ P(A) ↔ P(A')
+            bindComplement('cA', 'cNotA');
+            bindComplement('cNotA', 'cA');
+
+            // Bù trừ P(B|A) ↔ P(B'|A)
+            bindComplement('cB_A', 'cNotB_A');
+            bindComplement('cNotB_A', 'cB_A');
+
+            // Bù trừ P(B|A') ↔ P(B'|A')
+            bindComplement('cB_notA', 'cNotB_notA');
+            bindComplement('cNotB_notA', 'cB_notA');
+
+            // Chạy lần đầu
+            calculateBayes();
+        });
 
         function copyBayesSolution() {
             const steps = document.getElementById('bayes-steps-container').innerText;
@@ -1226,9 +1285,18 @@
         }
 
         function resetBayes() {
-            ['cA','cNotA','cB_A','cNotB_A','cB_notA','cNotB_notA'].forEach(id => { let el = document.getElementById(id); if(el) el.value = ''; });
-            ['rAB','rAnBnot','rnotAB','rnotAnBnot'].forEach(id => { let el = document.getElementById(id); if(el) el.innerHTML = '0'; });
-            ['pBT_input','pBnotT_input','pAgB_input','pNotAgB_input','pAgBnot_input','pNotAgBnot_input'].forEach(id => { let el = document.getElementById(id); if(el) el.value = ''; });
+            ['cA','cNotA','cB_A','cNotB_A','cB_notA','cNotB_notA'].forEach(id => {
+                let el = document.getElementById(id);
+                if(el) el.value = '';
+            });
+            ['rAB','rAnBnot','rnotAB','rnotAnBnot'].forEach(id => {
+                let el = document.getElementById(id);
+                if(el) el.innerHTML = '0';
+            });
+            ['pBT_input','pBnotT_input','pAgB_input','pNotAgB_input','pAgBnot_input','pNotAgBnot_input'].forEach(id => {
+                let el = document.getElementById(id);
+                if(el) el.value = '';
+            });
             document.getElementById('bayes-steps').style.display = 'none';
         }
 
