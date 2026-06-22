@@ -803,40 +803,66 @@
                 <div style="margin-top:15px;"><button class="btn" onclick="resetBayes()">🔄 Làm mới sơ đồ</button></div>
             </div>
 
-            <!-- ========== TAB 3: THỐNG KÊ MÔ TẢ ========== -->
+            <!-- ========== TAB 3: THỐNG KÊ MÔ TẢ (GHÉP NHÓM) ========== -->
             <div id="tab-statistics" class="tab-content">
-                <div class="stats-grid">
-                    <div class="stats-group-card">
-                        <h3 style="color:var(--neon-blue);">🔵 NHÓM A</h3>
-                        <table class="data-table" id="table-A">
-                            <thead><tr><th>xᵢ</th><th>nᵢ</th><th></th></tr></thead>
-                            <tbody>
-                                <tr><td><input type="number" class="val-x" value="5"></td><td><input type="number" class="val-n" value="2"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr>
-                                <tr><td><input type="number" class="val-x" value="7"></td><td><input type="number" class="val-n" value="3"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr>
-                            </tbody>
-                        </table>
-                        <button class="btn-add-row" onclick="addStatsRow('table-A')" style="margin-top:10px; width:100%;">+ Thêm dòng</button>
+                <div class="glass-card" style="border-color: var(--neon-blue); padding: 20px;">
+                    <h3 style="color: var(--neon-blue); font-family: var(--font-orb); font-size: 1rem;">📊 THỐNG KÊ SỐ LIỆU GHÉP NHÓM</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-mid); margin-bottom: 16px;">
+                        Nhập giá trị đại diện đầu tiên, khoảng cách giữa các nhóm, và số nhóm. Bảng sẽ tự động sinh.
+                    </p>
+
+                    <!-- Nhập tham số -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-size: 0.75rem; color: var(--text-mid);">Giá trị đại diện đầu (d₁)</label>
+                            <input type="number" id="stat-d1" value="4" step="0.1" style="width: 100%; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: white; font-size: 1rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; color: var(--text-mid);">Giá trị đại diện thứ hai (d₂)</label>
+                            <input type="number" id="stat-d2" value="8" step="0.1" style="width: 100%; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: white; font-size: 1rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; color: var(--text-mid);">Số nhóm (k)</label>
+                            <input type="number" id="stat-k" value="5" min="2" max="20" style="width: 100%; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: white; font-size: 1rem;">
+                        </div>
                     </div>
-                    <div class="stats-group-card">
-                        <h3 style="color:var(--neon-pink);">🟠 NHÓM B</h3>
-                        <table class="data-table" id="table-B">
-                            <thead><tr><th>xᵢ</th><th>nᵢ</th><th></th></tr></thead>
-                            <tbody>
-                                <tr><td><input type="number" class="val-x" value="8"></td><td><input type="number" class="val-n" value="4"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr>
-                                <tr><td><input type="number" class="val-x" value="6"></td><td><input type="number" class="val-n" value="1"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr>
-                            </tbody>
-                        </table>
-                        <button class="btn-add-row" onclick="addStatsRow('table-B')" style="margin-top:10px; width:100%;">+ Thêm dòng</button>
+
+                    <!-- Bảng tần số tự động -->
+                    <table class="data-table" id="stat-table">
+                        <thead>
+                            <tr>
+                                <th>Nhóm (khoảng)</th>
+                                <th>Giá trị đại diện</th>
+                                <th>Tần số (nᵢ)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stat-table-body">
+                            <!-- JS sẽ tự sinh -->
+                        </tbody>
+                    </table>
+
+                    <!-- Các nút -->
+                    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                        <button class="btn" onclick="calcStatsGrouped()">📊 TÍNH TOÁN</button>
+                        <button class="btn btn-reset" onclick="resetStatsGrouped()">🔄 Làm mới</button>
                     </div>
-                </div>
-                <div style="text-align:center;"><button class="stats-calc-btn" onclick="calculateStatsData()">📈 PHÂN TÍCH DỮ LIỆU</button>
-                <button class="stats-reset-btn" onclick="resetStatsData()" style="margin-left:10px;">🔄 LÀM MỚI</button></div>
-                <div id="stats-results-container" style="display:none; margin-top:20px;">
-                    <div class="glass-card" style="border-color:var(--emerald);"><div style="color:var(--emerald);">📊 KẾT QUẢ THỐNG KÊ</div><div id="stats-results-output"></div></div>
-                </div>
-                <div class="step-solution" id="stats-steps" style="display:none; margin-top:15px;">
-                    <div style="display:flex; justify-content:space-between;"><span class="sec-label green">📝 Lời Giải Chi Tiết</span><button class="copy-sol-btn" onclick="copyStatsSolution()">📋 Copy</button></div>
-                    <div id="stats-steps-container"></div>
+
+                    <!-- Kết quả -->
+                    <div id="stat-results-area" style="display: none; margin-top: 20px;">
+                        <div class="glass-card" style="border-color: var(--emerald);">
+                            <h4 style="color: var(--neon-green); font-family: var(--font-orb); margin-bottom: 12px;">📈 KẾT QUẢ THỐNG KÊ</h4>
+                            <div id="stat-results-output" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Lời giải chi tiết -->
+                    <div class="step-solution" id="stat-steps-grouped" style="display: none; margin-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span class="sec-label green">📝 Lời Giải Chi Tiết</span>
+                            <button class="copy-sol-btn" onclick="copyStatsGroupedSolution()">📋 Copy</button>
+                        </div>
+                        <div id="stat-steps-grouped-container"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1300,97 +1326,343 @@
             document.getElementById('bayes-steps').style.display = 'none';
         }
 
-        // ========== THỐNG KÊ ==========
-        function addStatsRow(tableId) {
-            const tbody = document.querySelector(`#${tableId} tbody`);
-            const row = document.createElement('tr');
-            row.innerHTML = `<td><input type="number" class="val-x" placeholder="x"></td><td><input type="number" class="val-n" placeholder="n"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td>`;
-            tbody.appendChild(row);
+        // ================================================================
+        // THỐNG KÊ GHÉP NHÓM - TÍNH TOÁN THEO CÔNG THỨC SGK
+        // ================================================================
+
+        // Hàm tự động sinh bảng khi thay đổi input
+        function renderStatsTable() {
+            const d1 = parseFloat(document.getElementById('stat-d1').value) || 0;
+            const d2 = parseFloat(document.getElementById('stat-d2').value) || 0;
+            const k = parseInt(document.getElementById('stat-k').value) || 2;
+
+            if (k < 2) return;
+
+            const h = d2 - d1;
+            const tbody = document.getElementById('stat-table-body');
+            let html = '';
+
+            for (let i = 0; i < k; i++) {
+                const daiDien = d1 + i * h;
+                const canDuoi = daiDien - h / 2;
+                const canTren = daiDien + h / 2;
+                html += `
+                    <tr>
+                        <td>[${canDuoi.toFixed(1)}; ${canTren.toFixed(1)})</td>
+                        <td>${daiDien.toFixed(1)}</td>
+                        <td><input type="number" class="freq-input" value="0" min="0" step="1"></td>
+                    </tr>
+                `;
+            }
+
+            tbody.innerHTML = html;
+            document.getElementById('stat-results-area').style.display = 'none';
+            document.getElementById('stat-steps-grouped').style.display = 'none';
         }
 
-        function getTableData(tableId) {
-            const data = [];
-            document.querySelectorAll(`#${tableId} tbody tr`).forEach(row => {
-                const x = parseFloat(row.querySelector('.val-x')?.value);
-                const n = parseFloat(row.querySelector('.val-n')?.value);
-                if (!isNaN(x) && !isNaN(n) && n > 0) data.push({ x, n });
+        // Hàm tính tứ phân vị (Q1, Q2, Q3) cho số liệu ghép nhóm
+        function groupedQuartile(classes, freqs, targetPos) {
+            const N = freqs.reduce((a, b) => a + b, 0);
+            let cumulative = 0;
+
+            for (let i = 0; i < freqs.length; i++) {
+                const prevCum = cumulative;
+                cumulative += freqs[i];
+
+                if (targetPos <= cumulative) {
+                    const L = classes[i][0];
+                    const h = classes[i][1] - classes[i][0];
+                    const f = freqs[i];
+                    return L + ((targetPos - prevCum) / f) * h;
+                }
+            }
+            return null;
+        }
+
+        // Hàm tính Mốt (Mo) cho số liệu ghép nhóm
+        function groupedMode(classes, freqs) {
+            let modalIndex = 0;
+            for (let i = 1; i < freqs.length; i++) {
+                if (freqs[i] > freqs[modalIndex]) modalIndex = i;
+            }
+
+            const L = classes[modalIndex][0];
+            const h = classes[modalIndex][1] - classes[modalIndex][0];
+            const nm = freqs[modalIndex];
+            const prev = modalIndex > 0 ? freqs[modalIndex - 1] : 0;
+            const next = modalIndex < freqs.length - 1 ? freqs[modalIndex + 1] : 0;
+
+            const delta1 = nm - prev;
+            const delta2 = nm - next;
+            if (delta1 + delta2 === 0) return L; // tránh chia 0
+
+            return L + (delta1 / (delta1 + delta2)) * h;
+        }
+
+        // Hàm tính toán chính
+        function calcStatsGrouped() {
+            const rows = document.querySelectorAll('#stat-table-body tr');
+            const classes = [];
+            const freqs = [];
+
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                const khoangText = cols[0].textContent.trim();
+                const parts = khoangText.match(/\[(.*?);\s*(.*?)\)/);
+                if (parts) {
+                    classes.push([parseFloat(parts[1]), parseFloat(parts[2])]);
+                }
+                const f = parseFloat(cols[2].querySelector('input').value) || 0;
+                freqs.push(f);
             });
-            return data;
+
+            const N = freqs.reduce((a, b) => a + b, 0);
+            if (N === 0) {
+                alert('Vui lòng nhập tần số cho các nhóm!');
+                return;
+            }
+
+            // Tính các chỉ số
+            const q1 = groupedQuartile(classes, freqs, N / 4);
+            const q2 = groupedQuartile(classes, freqs, N / 2);
+            const q3 = groupedQuartile(classes, freqs, 3 * N / 4);
+            const mode = groupedMode(classes, freqs);
+
+            // Tính trung bình (từ giá trị đại diện)
+            let sumX = 0;
+            rows.forEach((row, i) => {
+                const daiDien = parseFloat(row.querySelectorAll('td')[1].textContent);
+                sumX += daiDien * freqs[i];
+            });
+            const mean = sumX / N;
+
+            // Tính phương sai và độ lệch chuẩn (công thức ghép nhóm)
+            let sumSq = 0;
+            rows.forEach((row, i) => {
+                const daiDien = parseFloat(row.querySelectorAll('td')[1].textContent);
+                sumSq += freqs[i] * Math.pow(daiDien - mean, 2);
+            });
+            const variance = sumSq / N;
+            const stdDev = Math.sqrt(variance);
+
+            // Hiển thị kết quả
+            const output = document.getElementById('stat-results-output');
+            output.innerHTML = `
+                <div class="stat-item">
+                    <div class="label">Trung bình (x̄)</div>
+                    <div class="value">${mean.toFixed(3)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Q₁ (tứ phân vị 1)</div>
+                    <div class="value">${q1 ? q1.toFixed(3) : '—'}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Q₂ (trung vị)</div>
+                    <div class="value q2">${q2 ? q2.toFixed(3) : '—'}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Q₃ (tứ phân vị 3)</div>
+                    <div class="value">${q3 ? q3.toFixed(3) : '—'}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Khoảng tứ phân vị (ΔQ)</div>
+                    <div class="value">${q1 && q3 ? (q3 - q1).toFixed(3) : '—'}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Mốt (Mₒ)</div>
+                    <div class="value mode">${mode ? mode.toFixed(3) : '—'}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Phương sai (S²)</div>
+                    <div class="value var">${variance.toFixed(3)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Độ lệch chuẩn (S)</div>
+                    <div class="value std">${stdDev.toFixed(3)}</div>
+                </div>
+            `;
+
+            document.getElementById('stat-results-area').style.display = 'block';
+
+            // Lời giải chi tiết
+            buildStatsStepsGrouped(classes, freqs, mean, q1, q2, q3, mode, variance, stdDev);
         }
 
-        function processStatsData(data) {
-            if (!data.length) return null;
-            data.sort((a,b)=>a.x-b.x);
-            let N=0, sumX=0, expanded=[];
-            data.forEach(d=>{ N+=d.n; sumX+=d.x*d.n; for(let i=0;i<d.n;i++) expanded.push(d.x); });
-            const mean = sumX/N;
-            let sumSq=0;
-            data.forEach(d=> sumSq += d.n * Math.pow(d.x-mean,2));
-            const variance = sumSq/N;
-            const getMed = arr => arr.length%2 ? arr[Math.floor(arr.length/2)] : (arr[arr.length/2-1]+arr[arr.length/2])/2;
-            const q2 = getMed(expanded);
-            const mid = Math.floor(expanded.length/2);
-            const q1 = getMed(expanded.slice(0,mid));
-            const q3 = getMed(expanded.slice(expanded.length%2?mid+1:mid));
-            return { mean, variance, stdDev: Math.sqrt(variance), range: data[data.length-1].x-data[0].x, q1, q2, q3, iqr: q3-q1 };
+        // Xây dựng lời giải chi tiết từng bước
+        function buildStatsStepsGrouped(classes, freqs, mean, q1, q2, q3, mode, variance, stdDev) {
+            const container = document.getElementById('stat-steps-grouped-container');
+            const N = freqs.reduce((a, b) => a + b, 0);
+
+            let stepsHTML = `
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <div class="step-title">Tổng tần số</div>
+                        <div class="step-formula">N = ${freqs.join(' + ')} = ${N}</div>
+                    </div>
+                </div>
+            `;
+
+            // Tích lũy và tìm nhóm chứa tứ phân vị
+            let cum = 0;
+            let details = [];
+            for (let i = 0; i < freqs.length; i++) {
+                const prevCum = cum;
+                cum += freqs[i];
+                details.push({
+                    nhom: `[${classes[i][0]}; ${classes[i][1]})`,
+                    f: freqs[i],
+                    F_truoc: prevCum,
+                    F_sau: cum
+                });
+            }
+
+            // Hàm tìm nhóm chứa vị trí
+            function findGroup(pos) {
+                for (let i = 0; i < details.length; i++) {
+                    if (pos <= details[i].F_sau) return i;
+                }
+                return -1;
+            }
+
+            const idxQ1 = findGroup(N / 4);
+            const idxQ2 = findGroup(N / 2);
+            const idxQ3 = findGroup(3 * N / 4);
+
+            if (idxQ1 >= 0) {
+                const d = details[idxQ1];
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-num">2</div>
+                        <div class="step-body">
+                            <div class="step-title">Q₁ (tứ phân vị 1) — vị trí N/4 = ${N/4}</div>
+                            <div class="step-formula">
+                                Nhóm chứa Q₁: ${d.nhom} với L = ${classes[idxQ1][0]}, h = ${(classes[idxQ1][1] - classes[idxQ1][0]).toFixed(1)}, f = ${d.f}, F = ${d.F_truoc}<br>
+                                Q₁ = ${classes[idxQ1][0]} + ((${N/4} - ${d.F_truoc}) / ${d.f}) × ${(classes[idxQ1][1] - classes[idxQ1][0]).toFixed(1)} = <span class="hi-g">${q1.toFixed(3)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (idxQ2 >= 0) {
+                const d = details[idxQ2];
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <div class="step-body">
+                            <div class="step-title">Q₂ (trung vị) — vị trí N/2 = ${N/2}</div>
+                            <div class="step-formula">
+                                Nhóm chứa Q₂: ${d.nhom} với L = ${classes[idxQ2][0]}, h = ${(classes[idxQ2][1] - classes[idxQ2][0]).toFixed(1)}, f = ${d.f}, F = ${d.F_truoc}<br>
+                                Q₂ = ${classes[idxQ2][0]} + ((${N/2} - ${d.F_truoc}) / ${d.f}) × ${(classes[idxQ2][1] - classes[idxQ2][0]).toFixed(1)} = <span class="hi-g">${q2.toFixed(3)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (idxQ3 >= 0) {
+                const d = details[idxQ3];
+                stepsHTML += `
+                    <div class="step-card">
+                        <div class="step-num">4</div>
+                        <div class="step-body">
+                            <div class="step-title">Q₃ (tứ phân vị 3) — vị trí 3N/4 = ${3*N/4}</div>
+                            <div class="step-formula">
+                                Nhóm chứa Q₃: ${d.nhom} với L = ${classes[idxQ3][0]}, h = ${(classes[idxQ3][1] - classes[idxQ3][0]).toFixed(1)}, f = ${d.f}, F = ${d.F_truoc}<br>
+                                Q₃ = ${classes[idxQ3][0]} + ((${3*N/4} - ${d.F_truoc}) / ${d.f}) × ${(classes[idxQ3][1] - classes[idxQ3][0]).toFixed(1)} = <span class="hi-g">${q3.toFixed(3)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Tìm Mốt
+            let modalIndex = 0;
+            for (let i = 1; i < freqs.length; i++) {
+                if (freqs[i] > freqs[modalIndex]) modalIndex = i;
+            }
+            const nm = freqs[modalIndex];
+            const nPrev = modalIndex > 0 ? freqs[modalIndex - 1] : 0;
+            const nNext = modalIndex < freqs.length - 1 ? freqs[modalIndex + 1] : 0;
+            stepsHTML += `
+                <div class="step-card">
+                    <div class="step-num">5</div>
+                    <div class="step-body">
+                        <div class="step-title">Mốt (Mₒ) — nhóm có tần số lớn nhất</div>
+                        <div class="step-formula">
+                            Nhóm chứa Mốt: [${classes[modalIndex][0]}; ${classes[modalIndex][1]}) với L = ${classes[modalIndex][0]}, h = ${(classes[modalIndex][1] - classes[modalIndex][0]).toFixed(1)}<br>
+                            n<sub>m</sub> = ${nm}, n<sub>m-1</sub> = ${nPrev}, n<sub>m+1</sub> = ${nNext}<br>
+                            Mₒ = ${classes[modalIndex][0]} + ((${nm} - ${nPrev}) / ((${nm} - ${nPrev}) + (${nm} - ${nNext}))) × ${(classes[modalIndex][1] - classes[modalIndex][0]).toFixed(1)} = <span class="hi-g">${mode.toFixed(3)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Phương sai & Độ lệch chuẩn
+            let sumSqHTML = '';
+            rows = document.querySelectorAll('#stat-table-body tr');
+            rows.forEach((row, i) => {
+                const daiDien = parseFloat(row.querySelectorAll('td')[1].textContent);
+                const f = freqs[i];
+                if (f > 0) {
+                    sumSqHTML += `${f} × (${daiDien} - ${mean.toFixed(2)})²`;
+                    if (i < freqs.length - 1) sumSqHTML += ' + ';
+                }
+            });
+            stepsHTML += `
+                <div class="step-card">
+                    <div class="step-num">6</div>
+                    <div class="step-body">
+                        <div class="step-title">Phương sai (S²)</div>
+                        <div class="step-formula">
+                            S² = (1/N) × Σ nᵢ(xᵢ - x̄)²<br>
+                            S² = (1/${N}) × (${sumSqHTML}) = <span class="hi-g">${variance.toFixed(3)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">7</div>
+                    <div class="step-body">
+                        <div class="step-title">Độ lệch chuẩn (S)</div>
+                        <div class="step-formula">
+                            S = √S² = √${variance.toFixed(3)} = <span class="hi-g">${stdDev.toFixed(3)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = stepsHTML;
+            document.getElementById('stat-steps-grouped').style.display = 'block';
         }
 
-        function calculateStatsData() {
-            const dataA = getTableData('table-A'), dataB = getTableData('table-B');
-            const statsA = dataA.length ? processStatsData(dataA) : null;
-            const statsB = dataB.length ? processStatsData(dataB) : null;
-            const output = document.getElementById('stats-results-output');
-            const container = document.getElementById('stats-results-container');
-            if(!statsA && !statsB){ container.style.display='none'; return; }
-            container.style.display='block';
-            let html='<div class="stats-results-area">';
-            if(statsA) html+=`<div class="stat-card"><div class="label">NHÓM A - Trung bình</div><div class="val">${statsA.mean.toFixed(4)}</div></div>
-                            <div class="stat-card"><div class="label">NHÓM A - Phương sai</div><div class="val">${statsA.variance.toFixed(4)}</div></div>
-                            <div class="stat-card"><div class="label">NHÓM A - Độ lệch chuẩn</div><div class="val">${statsA.stdDev.toFixed(4)}</div></div>
-                            <div class="stat-card"><div class="label">NHÓM A - Q1,Q2,Q3</div><div class="val">${statsA.q1} | ${statsA.q2} | ${statsA.q3}</div></div>`;
-            if(statsB) html+=`<div class="stat-card"><div class="label">NHÓM B - Trung bình</div><div class="val">${statsB.mean.toFixed(4)}</div></div>
-                            <div class="stat-card"><div class="label">NHÓM B - Phương sai</div><div class="val">${statsB.variance.toFixed(4)}</div></div>
-                            <div class="stat-card"><div class="label">NHÓM B - Độ lệch chuẩn</div><div class="val">${statsB.stdDev.toFixed(4)}</div></div>
-                            <div class="stat-card"><div class="label">NHÓM B - Q1,Q2,Q3</div><div class="val">${statsB.q1} | ${statsB.q2} | ${statsB.q3}</div></div>`;
-            html+='</div>';
-            output.innerHTML = html;
-            buildStatsSteps(statsA, statsB);
-        }
-
-        function buildStatsSteps(statsA, statsB) {
-            const container = document.getElementById('stats-steps-container');
-            if(!container) return;
-            document.getElementById('stats-steps').style.display='block';
-            let html='';
-            if(statsA) html+=`<div class="step-card"><div class="step-num">1</div><div class="step-body"><div class="step-title">Nhóm A</div><div class="step-formula">x̄=${statsA.mean.toFixed(4)}, S²=${statsA.variance.toFixed(4)}, S=${statsA.stdDev.toFixed(4)}, R=${statsA.range}, ΔQ=${statsA.iqr.toFixed(4)}</div></div></div>`;
-            if(statsB) html+=`<div class="step-card"><div class="step-num">2</div><div class="step-body"><div class="step-title">Nhóm B</div><div class="step-formula">x̄=${statsB.mean.toFixed(4)}, S²=${statsB.variance.toFixed(4)}, S=${statsB.stdDev.toFixed(4)}, R=${statsB.range}, ΔQ=${statsB.iqr.toFixed(4)}</div></div></div>`;
-            container.innerHTML = html;
-        }
-
-        function copyStatsSolution() {
-            const steps = document.getElementById('stats-steps-container').innerText;
-            navigator.clipboard.writeText("=== LỜI GIẢI THỐNG KÊ ===\n" + steps);
-            const btn = document.querySelector('#stats-steps .copy-sol-btn');
+        // Copy lời giải
+        function copyStatsGroupedSolution() {
+            const steps = document.getElementById('stat-steps-grouped-container').innerText;
+            navigator.clipboard.writeText("=== LỜI GIẢI THỐNG KÊ GHÉP NHÓM ===\n" + steps);
+            const btn = document.querySelector('#stat-steps-grouped .copy-sol-btn');
             btn.textContent = '✅ Đã Copy!';
             setTimeout(() => btn.textContent = '📋 Copy', 2000);
         }
 
-        function resetStatsData() {
-            const tbodyA = document.querySelector('#table-A tbody');
-            if(tbodyA) tbodyA.innerHTML = `<tr><td><input type="number" class="val-x" value="5"></td><td><input type="number" class="val-n" value="2"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr><tr><td><input type="number" class="val-x" value="7"></td><td><input type="number" class="val-n" value="3"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr>`;
-            const tbodyB = document.querySelector('#table-B tbody');
-            if(tbodyB) tbodyB.innerHTML = `<tr><td><input type="number" class="val-x" value="8"></td><td><input type="number" class="val-n" value="4"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr><tr><td><input type="number" class="val-x" value="6"></td><td><input type="number" class="val-n" value="1"></td><td class="del-cell" onclick="this.parentElement.remove()">✖</td></tr>`;
-            document.getElementById('stats-results-container').style.display = 'none';
-            document.getElementById('stats-steps').style.display = 'none';
+        // Reset
+        function resetStatsGrouped() {
+            document.getElementById('stat-d1').value = '4';
+            document.getElementById('stat-d2').value = '8';
+            document.getElementById('stat-k').value = '5';
+            renderStatsTable();
+            document.getElementById('stat-results-area').style.display = 'none';
+            document.getElementById('stat-steps-grouped').style.display = 'none';
         }
 
-        function toggleCS() {
-            const sidebar = document.getElementById('cs-sidebar');
-            const overlay = document.getElementById('cs-overlay');
-            const isOpen = sidebar.classList.toggle('open');
-            if(overlay) overlay.classList.toggle('visible', isOpen);
-            document.body.style.overflow = isOpen ? 'hidden' : '';
-        }
+        // Gán sự kiện cho các input tham số (chạy sau khi DOM load)
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = ['stat-d1', 'stat-d2', 'stat-k'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', renderStatsTable);
+            });
+            renderStatsTable();
+        });
 
         // ========== CHẾ ĐỘ NHẬP TẦN SỐ ==========
         let classicInputMode = 'prob';

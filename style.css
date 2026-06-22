@@ -897,6 +897,66 @@ input[type="number"].rev-input:focus {
 }
 
 /* ============================================================
+   THỐNG KÊ GHÉP NHÓM (Dùng cho probability.html)
+   ============================================================ */
+
+#stat-table .freq-input {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    color: white;
+    font-family: var(--font-mono);
+    width: 100%;
+}
+#stat-table .freq-input:focus {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 8px rgba(0,242,255,0.2);
+    outline: none;
+}
+#stat-table tbody tr td {
+    padding: 8px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+}
+#stat-table tbody tr td:first-child {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+.stat-item {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+}
+.stat-item .label {
+    font-size: 0.7rem;
+    color: var(--text-mid);
+    font-family: var(--font-orb);
+    margin-bottom: 6px;
+}
+.stat-item .value {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--neon-green);
+}
+.stat-item .value.q2 {
+    color: var(--neon-yellow);
+}
+.stat-item .value.mode {
+    color: var(--neon-blue);
+}
+.stat-item .value.var {
+    color: var(--neon-pink);
+}
+.stat-item .value.std {
+    color: var(--neon-purple);
+}
+
+/* ============================================================
    RESPONSIVE — MOBILE FIRST
    ============================================================ */
 
