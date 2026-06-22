@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MathWheel - Phiêu lưu Toán học</title>
     <link rel="icon" type="image/png" href="logo.png">
+    <!-- Preload fonts and logo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="logo.png" as="image">
     <link rel="stylesheet" href="style.css">
     <style>
         /* ===== BASE ===== */
@@ -1796,13 +1800,21 @@
                 }
             });
 
+            // ========== TỐI ƯU HÓA SỰ KIỆN CẢM ỨNG ==========
             function setupTouchButton(btn, key) {
                 if (!btn) return;
-                const start = (e) => { e.preventDefault(); state.keys[key] = true; };
-                const end = (e) => { e.preventDefault(); state.keys[key] = false; };
-                btn.addEventListener('touchstart', start, {passive: false});
-                btn.addEventListener('touchend', end, {passive: false});
-                btn.addEventListener('touchcancel', end, {passive: false});
+                const start = (e) => { 
+                    e.preventDefault(); // Cần chặn mặc định cho nút di chuyển
+                    state.keys[key] = true; 
+                };
+                const end = (e) => { 
+                    e.preventDefault(); 
+                    state.keys[key] = false; 
+                };
+                // Thêm { passive: false } vì có e.preventDefault()
+                btn.addEventListener('touchstart', start, { passive: false });
+                btn.addEventListener('touchend', end, { passive: false });
+                btn.addEventListener('touchcancel', end, { passive: false });
                 btn.addEventListener('mousedown', start);
                 btn.addEventListener('mouseup', end);
                 btn.addEventListener('mouseleave', end);
@@ -1812,12 +1824,11 @@
             setupTouchButton(leftBtn, 'left');
             setupTouchButton(rightBtn, 'right');
 
-            // ========== SỰ KIỆN CHUỘT / CHẠM - SỬA THEO YÊU CẦU ==========
+            // ========== SỰ KIỆN CHUỘT / CHẠM - Đã tối ưu passive ==========
             function handlePointerDown(e) {
-                // Chỉ xử lý nếu sự kiện đến từ canvas
                 if (e.target !== canvas) return;
                 if (!state.isPlaying || state.gameOver) return;
-                e.preventDefault();
+                e.preventDefault(); // Cần chặn cuộn
 
                 const rect = canvas.getBoundingClientRect();
                 let clientX, clientY;
@@ -1831,11 +1842,9 @@
 
                 if (clientX === undefined || clientY === undefined) return;
 
-                // Tính tọa độ pixel trên canvas
                 const canvasX = clientX - rect.left;
                 const canvasY = clientY - rect.top;
 
-                // Giới hạn trong phạm vi canvas
                 const targetX = clamp(canvasX, 0, C.cssW || C.w);
                 const targetY = clamp(canvasY, 0, C.cssH || C.h);
 
@@ -1846,12 +1855,10 @@
             }
 
             function handlePointerMove(e) {
-                // Chỉ xử lý nếu sự kiện đến từ canvas và đang chạm (touchmove)
                 if (e.target !== canvas) return;
                 if (!state.isPlaying || state.gameOver) return;
-                // Chỉ xử lý cho touchmove, không xử lý mousemove để tránh can thiệp
                 if (!e.touches) return;
-                e.preventDefault();
+                e.preventDefault(); // Cần chặn cuộn
 
                 const rect = canvas.getBoundingClientRect();
                 const touch = e.touches[0];
@@ -1866,7 +1873,7 @@
                 }
             }
 
-            // Gắn sự kiện
+            // Gắn sự kiện với { passive: false } để đảm bảo preventDefault hoạt động
             canvas.addEventListener('mousedown', handlePointerDown);
             canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
             canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
@@ -1906,8 +1913,9 @@
             updateUI();
             renderPanel();
 
-            document.addEventListener('click', initAudio, { once: true });
-            document.addEventListener('touchstart', initAudio, { once: true });
+            // Sự kiện khởi tạo audio dùng passive: true (không cần preventDefault)
+            document.addEventListener('click', initAudio, { passive: true, once: true });
+            document.addEventListener('touchstart', initAudio, { passive: true, once: true });
 
         })();
     </script>
